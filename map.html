@@ -7,8 +7,14 @@
 .panel .bd{padding:0 12px 10px;max-height:60vh;overflow:auto}.panel.closed .bd{display:none}
 .sw{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px;border:1px solid #0003}
 details{margin-top:6px}summary{cursor:pointer;font-weight:600}.pp td{padding:1px 8px 1px 0;vertical-align:top}.pp td:last-child{text-align:right;font-weight:600}
+.srch{position:absolute;z-index:1000;top:10px;left:54px;right:190px;max-width:340px}
+.srch input{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #bbb;border-radius:6px;font:14px system-ui,sans-serif;box-shadow:0 1px 6px #0004}
+.srch ul{list-style:none;margin:2px 0 0;padding:0;background:#fff;border-radius:6px;box-shadow:0 1px 6px #0004;max-height:50vh;overflow:auto}
+.srch li{padding:8px 10px;cursor:pointer;font-size:13px;border-bottom:1px solid #eee}.srch li small{color:#666}.srch li.on,.srch li:hover{background:#eef4fa}
+.srch .msg{padding:8px 10px;font-size:13px;background:#fff;border-radius:6px;box-shadow:0 1px 6px #0004;margin-top:2px;color:#444}
 .warn{background:#fff4d6;border-left:3px solid #d99a00;padding:4px 6px;margin-top:6px}small{color:#555}</style></head><body>
 <div id="map"></div>
+<div class="srch"><input id="q" type="search" placeholder="Search address, e.g. 102 Clark St" aria-label="Search for a lot by address" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="res"><ul id="res" role="listbox" hidden></ul><div class="msg" id="msg" hidden></div></div>
 <div class="panel" id="panel">
 <button class="hd" id="tog" aria-expanded="true" aria-controls="bd"><span>Legend and notes</span><span id="chev">&#9662;</span></button>
 <div class="bd" id="bd">
@@ -46,6 +52,27 @@ var pl=L.geoJSON(PARCELS,{style:function(f){var p=f.properties;if(p.chk)return {
   if(p.chk){h+='<div class="warn"><b>Data check.</b> The Question 7 data shows '+n(p.area)+' sq ft, but the assessor lists '+(p.assess?n(p.assess)+' sq ft':'a different size')+(p.multi?' and the parcel has more than one separate piece':'')+'. Lot counts are not shown until verified.</div>'}
   else{h+='<table class="pp"><tr><td>Lot area</td><td>'+n(p.area)+' sq ft</td></tr><tr><td>Frontage</td><td>'+n(p.front)+' ft</td></tr><tr><td>Lots possible today (est.)</td><td>'+(p.cur+1)+'</td></tr><tr><td>Lots possible at 5,000 sq ft</td><td>'+(p.added+1)+'</td></tr><tr><td>New lots unlocked</td><td>'+p.unl+'</td></tr></table>'}
   l.bindPopup(h)}}).addTo(map);
+var AB={street:'st',avenue:'ave',road:'rd',drive:'dr',court:'ct',lane:'ln',place:'pl',boulevard:'blvd',terrace:'ter',circle:'cir',parkway:'pkwy',east:'e',west:'w',north:'n',south:'s',mount:'mt',mountain:'mtn'};
+function norm(t){return t.toLowerCase().replace(/[.,#]/g,' ').split(/\s+/).filter(Boolean).map(function(w){return AB[w]||w})}
+var IDX=[];pl.eachLayer(function(l){var p=l.feature.properties;IDX.push({l:l,a:p.addr,z:p.zone,chk:p.chk,t:norm(p.addr)})});
+var q=document.getElementById('q'),res=document.getElementById('res'),msg=document.getElementById('msg'),sel=-1,cur=[];
+function find(v){var qt=norm(v);if(!qt.length)return[];var out=[];IDX.forEach(function(e){var ok=qt.every(function(w,i){var ex=/^\d+$/.test(w)&&i<qt.length-1;return e.t.some(function(x){return ex?x===w:x.indexOf(w)===0})});if(ok)out.push(e)});
+ out.sort(function(a,b){return (a.t[0]===qt[0]?0:1)-(b.t[0]===qt[0]?0:1)||a.a.localeCompare(b.a,undefined,{numeric:true})});return out}
+function show(list){res.innerHTML='';cur=list.slice(0,8);sel=-1;msg.hidden=true;
+ cur.forEach(function(e,i){var li=document.createElement('li');li.setAttribute('role','option');li.innerHTML='<b></b> <small></small>';li.firstChild.textContent=e.a;li.lastChild.textContent=e.z+(e.chk?' (data check)':'');li.onmousedown=function(ev){ev.preventDefault();go(e)};res.appendChild(li)});
+ res.hidden=!cur.length;q.setAttribute('aria-expanded',!!cur.length);
+ if(!cur.length&&q.value.trim()){msg.textContent='No flagged lot matches. It may be too small to split, in another district, or not in the data.';msg.hidden=false}
+ if(list.length>8){msg.textContent=(list.length-8)+' more matches. Keep typing to narrow.';msg.hidden=false}}
+function go(e){if(!map.hasLayer(pl)){pl.addTo(map);document.getElementById('p').checked=true}
+ res.hidden=true;msg.hidden=true;q.value=e.a;q.blur();if(window.innerWidth<=700)setOpen(false);
+ var b=e.l.getBounds();map.fitBounds(b,{maxZoom:19,padding:[40,40]});e.l.openPopup(b.getCenter())}
+q.oninput=function(){show(find(q.value))};
+q.onfocus=function(){if(q.value)show(find(q.value))};
+q.onblur=function(){setTimeout(function(){res.hidden=true},150)};
+q.onkeydown=function(ev){var lis=res.children;
+ if(ev.key==='ArrowDown'&&lis.length){ev.preventDefault();sel=(sel+1)%lis.length}else if(ev.key==='ArrowUp'&&lis.length){ev.preventDefault();sel=(sel<=0?lis.length:sel)-1}
+ else if(ev.key==='Enter'){ev.preventDefault();var t=cur[sel>=0?sel:0];if(t)go(t);return}else if(ev.key==='Escape'){res.hidden=true;return}else return;
+ for(var i=0;i<lis.length;i++)lis[i].classList.toggle('on',i===sel)};
 document.getElementById('z').onchange=function(){this.checked?zl.addTo(map):map.removeLayer(zl)};
 document.getElementById('p').onchange=function(){this.checked?pl.addTo(map):map.removeLayer(pl)};
 var panel=document.getElementById('panel'),tog=document.getElementById('tog');
