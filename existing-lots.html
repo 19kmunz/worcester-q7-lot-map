@@ -30,7 +30,7 @@ details{margin-top:6px}summary{cursor:pointer;font-weight:600}.pp td{padding:1px
 <label><input type="checkbox" id="b3" checked> Under 5,000 sq ft</label><br><label><input type="checkbox" id="g" checked> Other lots in these districts</label>
 <details><summary>How to read this map</summary>
 <p>Each shape is an existing detached single-family home on a lot smaller than its district's minimum (10,000 sq ft in RS-10, 7,000 sq ft in RS-7 and RL-7). Lot sizes are the assessor's, checked against the mapped outline. Half-duplexes, condominiums and lots with a potential data issue are not shown.</p>
-<p>A lot smaller than its district's minimum is legally non-conforming, usually grandfathered because the home pre-dates the rule.</p></details>
+<p>Year built comes from the assessor record. This map makes no claim about which homes are grandfathered.</p></details>
 <p><small>Lots: MassGIS Level 3 assessor parcels, FY2026. Zoning: City of Worcester. Basemap: USGS The National Map (needs internet).</small></p>
 </div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -53,7 +53,7 @@ var pl=L.geoJSON(PARCELS,{pane:'lots',style:function(f){var z=map.getZoom()>=15;
  onEachFeature:function(f,l){var p=f.properties;
   var h='<b>'+p.addr+'</b><br>Zone '+p.zone+' (minimum '+n(p.min)+' sq ft)<table class="pp"><tr><td>Lot area</td><td>'+n(p.lot)+' sq ft</td></tr><tr><td>Year built</td><td>'+(p.yr||'n/a')+'</td></tr><tr><td>Style</td><td>'+(p.style||'n/a')+'</td></tr></table>';
   if(p.band==='under')h+='<div class="warn" style="background:#fde8e8;border-color:#991b1b">Smaller than 5,000 sq ft, so a 5,000 sq ft minimum would not apply to this lot.</div>';
-  else if(p.band==='below')h+='<div class="warn">Smaller than the district minimum by '+n(p.min-p.lot)+' sq ft'+(p.yr&&p.yr<1991?'. Built before 1991, so likely grandfathered':'')+'. At 5,000 sq ft this lot would meet the minimum on lot area (frontage not tested).</div>';
+  else if(p.band==='below')h+='<div class="warn">Smaller than the district minimum by '+n(p.min-p.lot)+' sq ft'+'. At 5,000 sq ft this lot would meet the minimum on lot area (frontage not tested).</div>';
   l.bindPopup(h);grp[p.band].addLayer(l)}});
 grp.below.addTo(map);grp.under.addTo(map);
 map.on('zoomend',function(){pl.setStyle(pl.options.style)});
