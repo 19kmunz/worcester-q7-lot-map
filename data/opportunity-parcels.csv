@@ -1,4 +1,4 @@
-address,zone,lot_area_sqft_q7,lot_area_sqft_assessor,frontage_ft_q7,lots_possible_today_est,lots_possible_at_5000,new_lots_unlocked,data_check,lat,lon
+address,zone,lot_area_sqft_q7,lot_area_sqft_assessor,frontage_ft_q7,lots_possible_today_est,lots_possible_at_5000,new_lots_unlocked,potential_data_issue_excluded_from_totals,lat,lon
 100 Mountain St East,RS-7,1527141,1581228,1685,25,33,8,,42.317572,-71.782078
 274 Salisbury St,RS-10,58110,57530,640,5,11,6,,42.281867,-71.814644
 375 Salisbury St,RS-10,59183,57578,510,5,10,5,,42.284267,-71.824275

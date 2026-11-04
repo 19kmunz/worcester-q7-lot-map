@@ -22,7 +22,7 @@ details{margin-top:6px}summary{cursor:pointer;font-weight:600}.pp td{padding:1px
 <span class="sw" style="background:#e6ab02"></span>RS-7 / RL-7 zones (7,000 sq ft today)<br>
 <span class="sw" style="background:#7fb3d5"></span>RG-5 zone (already 5,000)<br>
 <span class="sw" style="background:#08306b"></span>Lot that could gain home sites (darker = more)<br>
-<span class="sw" style="background:#bdbdbd;border-style:dashed"></span>Lot with a data check (numbers not verified)
+<span class="sw" style="background:#bdbdbd;border-style:dashed"></span>Lot with a potential data issue (excluded from totals)
 <hr>
 <label><input type="checkbox" id="z" checked> Zoning districts</label><br>
 <label><input type="checkbox" id="p" checked> Opportunity lots</label>
@@ -49,7 +49,7 @@ function n(x){return x.toLocaleString()}
 var pl=L.geoJSON(PARCELS,{style:function(f){var p=f.properties;if(p.chk)return {color:'#777',weight:1,dashArray:'3 3',fillColor:'#bdbdbd',fillOpacity:.7};
   var k=Math.max(1,Math.min(4,p.unl||1));return {color:'#222',weight:.5,fillColor:ramp[k-1],fillOpacity:.85}},
  onEachFeature:function(f,l){var p=f.properties;var h='<b>'+p.addr+'</b><br>Zone '+p.zone;
-  if(p.chk){h+='<div class="warn"><b>Data check.</b> The Question 7 data shows '+n(p.area)+' sq ft, but the assessor lists '+(p.assess?n(p.assess)+' sq ft':'a different size')+(p.multi?' and the parcel has more than one separate piece':'')+'. Lot counts are not shown until verified.</div>'}
+  if(p.chk){h+='<div class="warn"><b>Potential data issue.</b> The Community Scale Question 7 Opportunity Data shows '+n(p.area)+' sq ft, but the assessor lists '+(p.assess?n(p.assess)+' sq ft':'a different size')+(p.multi?' and the parcel has more than one separate piece':'')+'. Counts for this lot are not included in the final tabulations.</div>'}
   else{h+='<table class="pp"><tr><td>Lot area</td><td>'+n(p.area)+' sq ft</td></tr><tr><td>Frontage</td><td>'+n(p.front)+' ft</td></tr><tr><td>Lots possible today (est.)</td><td>'+(p.cur+1)+'</td></tr><tr><td>Lots possible at 5,000 sq ft</td><td>'+(p.added+1)+'</td></tr><tr><td>New lots unlocked</td><td>'+p.unl+'</td></tr></table>'}
   l.bindPopup(h)}}).addTo(map);
 var AB={street:'st',avenue:'ave',road:'rd',drive:'dr',court:'ct',lane:'ln',place:'pl',boulevard:'blvd',terrace:'ter',circle:'cir',parkway:'pkwy',east:'e',west:'w',north:'n',south:'s',mount:'mt',mountain:'mtn'};
@@ -59,7 +59,7 @@ var q=document.getElementById('q'),res=document.getElementById('res'),msg=docume
 function find(v){var qt=norm(v);if(!qt.length)return[];var out=[];IDX.forEach(function(e){var ok=qt.every(function(w,i){var ex=/^\d+$/.test(w)&&i<qt.length-1;return e.t.some(function(x){return ex?x===w:x.indexOf(w)===0})});if(ok)out.push(e)});
  out.sort(function(a,b){return (a.t[0]===qt[0]?0:1)-(b.t[0]===qt[0]?0:1)||a.a.localeCompare(b.a,undefined,{numeric:true})});return out}
 function show(list){res.innerHTML='';cur=list.slice(0,8);sel=-1;msg.hidden=true;
- cur.forEach(function(e,i){var li=document.createElement('li');li.setAttribute('role','option');li.innerHTML='<b></b> <small></small>';li.firstChild.textContent=e.a;li.lastChild.textContent=e.z+(e.chk?' (data check)':'');li.onmousedown=function(ev){ev.preventDefault();go(e)};res.appendChild(li)});
+ cur.forEach(function(e,i){var li=document.createElement('li');li.setAttribute('role','option');li.innerHTML='<b></b> <small></small>';li.firstChild.textContent=e.a;li.lastChild.textContent=e.z+(e.chk?' (potential data issue)':'');li.onmousedown=function(ev){ev.preventDefault();go(e)};res.appendChild(li)});
  res.hidden=!cur.length;q.setAttribute('aria-expanded',!!cur.length);
  if(!cur.length&&q.value.trim()){msg.textContent='No flagged lot matches. It may be too small to split, in another district, or not in the data.';msg.hidden=false}
  if(list.length>8){msg.textContent=(list.length-8)+' more matches. Keep typing to narrow.';msg.hidden=false}}
