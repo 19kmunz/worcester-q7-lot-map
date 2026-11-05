@@ -68,7 +68,7 @@ a{color:var(--accent)}
 #legend .sub{display:flex;flex-wrap:wrap;gap:4px 12px;margin:2px 0 0;font-size:.78rem;color:var(--muted)}
 #legend .sub span{display:inline-flex;align-items:center;gap:4px}
 #legend .sw{width:11px;height:11px}
-#legend .note{font-size:.76rem;color:var(--muted);margin:4px 0 0}
+#legend details{margin:6px 0}#legend summary{cursor:pointer;font-weight:600;padding:2px 0}#legend .note{font-size:.76rem;color:var(--muted);margin:4px 0 0}
 .pp{border-collapse:collapse;margin:4px 0}.pp td{padding:1px 10px 1px 0;vertical-align:top}.pp td:last-child{text-align:right;font-weight:600}
 .pn{margin-top:6px;padding:6px 8px;border-radius:6px;background:#fff1e3;border-left:3px solid #E17C05;font-size:.85rem}
 .pn.red{background:#fde8e8;border-color:#991b1b}
@@ -118,7 +118,10 @@ body.explore #legend{left:14px}
   <div class="lb" id="lgb">
     <label><input type="checkbox" id="lg_pZones" checked><span>Zoning districts<span class="sub"><span><span class="sw" style="background:#c2570c"></span>RS-10 (10,000 sq ft)</span><span><span class="sw" style="background:#e6ab02"></span>RS-7, RL-7 (7,000 sq ft)</span></span></span></label>
     <label><input type="checkbox" id="lg_pOpp" checked><span>Lots that could split<span class="sub"><span><span class="sw" style="background:#bdd7e7"></span><span class="sw" style="background:#6baed6"></span><span class="sw" style="background:#2171b5"></span><span class="sw" style="background:#08306b"></span>darker = more additional lots unlocked</span></span></span></label>
-    <label><input type="checkbox" id="lg_pUnch"><span><span class="sw" style="background:rgba(120,140,170,.18);border:1.5px dashed #6f87a6"></span> Unchanged lots<span class="sub">Same number of lots allowed today and at 5,000 sq ft, plus lots with a potential data issue. This change would not affect them.</span></span></label>
+    <details id="extra"><summary>Extra data</summary>
+      <label><input type="checkbox" id="lg_pUnch"><span><span class="sw" style="background:rgba(120,140,170,.18);border:1.5px dashed #6f87a6"></span> Unchanged lots<span class="sub">Today&rsquo;s rules already allow the same number of lots as 5,000 sq ft would, so this change would not affect them.</span></span></label>
+      <label><input type="checkbox" id="lg_pErr"><span><span class="sw" style="background:rgba(130,130,130,.2);border:1.5px dashed #777"></span> Potential data issues<span class="sub">Lots where the Question 7 data does not match the assessor record. Not counted in any total.</span></span></label>
+    </details>
     <label><input type="checkbox" id="lg_pExistB" checked><span><span class="sw" style="background:#f97316"></span> Homes below the district minimum</span></label>
     <label><input type="checkbox" id="lg_pExistU" checked><span><span class="sw" style="background:#991b1b"></span> Homes under 5,000 sq ft<span class="sub">A 5,000 sq ft minimum would not reach these</span></span></label>
     <p class="note">The story turns layers on as you scroll. Use the boxes to change them. Click a lot for details.</p>
@@ -285,7 +288,7 @@ applyPass();
 L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,opacity:.42,attribution:'Basemap: USGS The National Map'}).addTo(map);
 
 function pane(name,z){var p=map.createPane(name);p.style.zIndex=z;p.classList.add('fade');p.style.opacity=0;return L.svg({pane:name,padding:.4})}
-var rZones=pane('pZones',420),rExB=pane('pExistB',440),rExU=pane('pExistU',445),rUn=pane('pUnch',447),rOpp=pane('pOpp',450);
+var rZones=pane('pZones',420),rExB=pane('pExistB',440),rExU=pane('pExistU',445),rUn=pane('pUnch',446),rErr=pane('pErr',447),rOpp=pane('pOpp',450);
 
 function n(x){return x.toLocaleString()}
 var ZC={'RS-10':'#c2570c','RS-7':'#e6ab02','RL-7':'#e6ab02'};
@@ -301,18 +304,17 @@ var ramp=['#bdd7e7','#6baed6','#2171b5','#08306b'];
 var oppL={},exL={};
 var opp=L.geoJSON(STORY.opp,{renderer:rOpp,style:function(f){var k=Math.max(1,Math.min(4,f.properties.u||1));return {color:'#1b3a57',weight:.4,fillColor:ramp[k-1],fillOpacity:.92}},
   onEachFeature:function(f,l){var p=f.properties;l.bindPopup('<b>'+p.a+'</b><br>Zone '+p.z+'<table class="pp"><tr><td>Lot area</td><td>'+n(p.s)+' sq ft</td></tr><tr><td>Frontage</td><td>'+n(p.f)+' ft</td></tr><tr><td>Lots possible today (est.)</td><td>'+p.q+'</td></tr><tr><td>Lots possible at 5,000 sq ft</td><td>'+p.p+'</td></tr><tr><td>New lots unlocked</td><td>'+p.u+'</td></tr></table><div class="fine">Potential only: buildings, wetlands and easements are not considered.</div>')}}).addTo(map);
-var UNCH_FILL='#8da2bd';
-var unch=L.geoJSON(STORY.unch,{renderer:rUn,style:function(){return {color:'#6f87a6',weight:1,dashArray:'3 3',fillColor:UNCH_FILL,fillOpacity:.12}},
-  onEachFeature:function(f,l){var p=f.properties;
-   if(p.d)l.bindPopup('<b>'+p.a+'</b><br>Zone '+p.z+'<div class="pn" style="background:#f1f1f1;border-color:#999"><b>Potential data issue.</b> The Community Scale Question 7 Opportunity Data shows '+n(p.s)+' sq ft, which does not match the assessor record (for example a multi-part parcel). Counts for this lot are not included in the totals.</div>');
-   else l.bindPopup('<b>'+p.a+'</b><br>Zone '+p.z+'<table class="pp"><tr><td>Lot area</td><td>'+n(p.s)+' sq ft</td></tr><tr><td>Frontage</td><td>'+n(p.f)+' ft</td></tr><tr><td>Lots possible today (est.)</td><td>'+p.q+'</td></tr><tr><td>Lots possible at 5,000 sq ft</td><td>'+p.p+'</td></tr><tr><td>New lots unlocked</td><td>0</td></tr></table><div class="pn" style="background:#eef2f7;border-color:#6f87a6">Unchanged: today&rsquo;s rules already allow the same number of lots, so this change would not affect this lot.</div>')}}).addTo(map);
+function unchPopup(p){return '<b>'+p.a+'</b><br>Zone '+p.z+'<table class="pp"><tr><td>Lot area</td><td>'+n(p.s)+' sq ft</td></tr><tr><td>Frontage</td><td>'+n(p.f)+' ft</td></tr><tr><td>Lots possible today (est.)</td><td>'+p.q+'</td></tr><tr><td>Lots possible at 5,000 sq ft</td><td>'+p.p+'</td></tr><tr><td>New lots unlocked</td><td>0</td></tr></table><div class="pn" style="background:#eef2f7;border-color:#6f87a6">Unchanged: today&rsquo;s rules already allow the same number of lots, so this change would not affect this lot.</div>'}
+function errPopup(p){return '<b>'+p.a+'</b><br>Zone '+p.z+'<div class="pn" style="background:#f1f1f1;border-color:#999"><b>Potential data issue.</b> The Community Scale Question 7 Opportunity Data shows '+n(p.s)+' sq ft, which does not match the assessor record (for example a multi-part parcel). Counts for this lot are not included in the totals.</div>'}
+function mkUn(isErr,rd){return L.geoJSON({type:'FeatureCollection',features:STORY.unch.features.filter(function(f){return !!f.properties.d===isErr})},{renderer:rd,style:function(){return isErr?{color:'#777',weight:1,dashArray:'2 3',fillColor:'#888',fillOpacity:.14}:{color:'#6f87a6',weight:1,dashArray:'3 3',fillColor:'#8da2bd',fillOpacity:.12}},onEachFeature:function(f,l){l.bindPopup(isErr?errPopup(f.properties):unchPopup(f.properties))}}).addTo(map)}
+var unch=mkUn(false,rUn),errL=mkUn(true,rErr);
 function existPopup(p){var h='<b>'+p.a+'</b><br>Zone '+p.z+' (minimum '+n(p.m)+' sq ft)<table class="pp"><tr><td>Lot area</td><td>'+n(p.s)+' sq ft</td></tr><tr><td>Year built</td><td>'+(p.y||'n/a')+'</td></tr><tr><td>Style</td><td>'+(p.t||'n/a')+'</td></tr></table>';
   return h+(p.b==='u'?'<div class="pn red">Smaller than 5,000 sq ft, so a 5,000 sq ft minimum would not apply to this lot.</div>':'<div class="pn">Smaller than the district minimum by '+n(p.m-p.s)+' sq ft. At 5,000 sq ft this lot would meet the minimum on lot area (frontage not tested).</div>')}
 function mkExist(b,rd,col){return L.geoJSON({type:'FeatureCollection',features:STORY.exist.features.filter(function(f){return f.properties.b===b})},{renderer:rd,style:function(){return {color:'#4a2a0a',weight:.4,fillColor:col,fillOpacity:.92}},onEachFeature:function(f,l){l.bindPopup(existPopup(f.properties))}}).addTo(map)}
 var existB=mkExist('b',rExB,'#f97316'),existU=mkExist('u',rExU,'#991b1b');
 
 function setPane(name,on){var cb=document.getElementById('lg_'+name);if(cb)cb.checked=on;var el=map.getPane(name);if(on){el.style.pointerEvents='';el.style.opacity=1}else{el.style.opacity=0;el.style.pointerEvents='none'}}
-['pZones','pOpp','pExistB','pExistU','pUnch'].forEach(function(p){setPane(p,false)});
+['pZones','pOpp','pExistB','pExistU','pUnch','pErr'].forEach(function(p){setPane(p,false)});
 var curZones=zonesHi;
 function useZones(g){if(g===curZones)return;map.removeLayer(curZones);map.addLayer(g);curZones=g}
 
@@ -343,7 +345,7 @@ steps.forEach(function(s){io.observe(s)});
 steps[0].classList.add('active');go('cover');
 window.addEventListener('scroll',function(){var h=document.documentElement;document.getElementById('progress').style.width=(100*h.scrollTop/(h.scrollHeight-h.clientHeight))+'%'},{passive:true});
 
-['pZones','pOpp','pExistB','pExistU','pUnch'].forEach(function(nm){document.getElementById('lg_'+nm).addEventListener('change',function(){setPane(nm,this.checked)})});
+['pZones','pOpp','pExistB','pExistU','pUnch','pErr'].forEach(function(nm){document.getElementById('lg_'+nm).addEventListener('change',function(){setPane(nm,this.checked)})});
 var lg=document.getElementById('legend'),lgt=document.getElementById('lgt');
 function lgOpen(o){lg.classList.toggle('closed',!o);lgt.setAttribute('aria-expanded',o);document.getElementById('lgc').innerHTML=o?'&#9662;':'&#9656;'}
 lgt.addEventListener('click',function(){lgOpen(lg.classList.contains('closed'))});
@@ -367,7 +369,7 @@ function norm(t){return t.toLowerCase().replace(/[.,#]/g,' ').split(/\s+/).filte
 var IDX=[];
 opp.eachLayer(function(l){var p=l.feature.properties;IDX.push({k:'o',a:p.a,t:norm(p.a),p:p,l:l,pane:'pOpp'})});
 [existB,existU].forEach(function(g){g.eachLayer(function(l){var p=l.feature.properties;IDX.push({k:'e',a:p.a,t:norm(p.a),p:p,l:l,pane:p.b==='u'?'pExistU':'pExistB'})})});
-unch.eachLayer(function(l){var p=l.feature.properties;IDX.push({k:p.d?'c':'n',a:p.a,t:norm(p.a),p:p,l:l,pane:'pUnch'})});
+unch.eachLayer(function(l){var p=l.feature.properties;IDX.push({k:'n',a:p.a,t:norm(p.a),p:p,l:l,pane:'pUnch'})});errL.eachLayer(function(l){var p=l.feature.properties;IDX.push({k:'c',a:p.a,t:norm(p.a),p:p,l:l,pane:'pErr'})});
 var q=document.getElementById('q'),res=document.getElementById('sres'),ans=document.getElementById('answer');
 function find(v){var qt=norm(v);if(!qt.length)return[];var out=IDX.filter(function(e){return qt.every(function(w,i){var ex=/^\d+$/.test(w)&&i<qt.length-1;return e.t.some(function(x){return ex?x===w:x.indexOf(w)===0})})});
   out.sort(function(a,b){return a.a.localeCompare(b.a,undefined,{numeric:true})});return out}
@@ -381,14 +383,14 @@ function pick(e){res.hidden=true;q.value=e.a;q.blur();ans.hidden=false;var p=e.p
   else if(e.k==='o'){ans.className='';ans.innerHTML='<b>'+p.a+'</b> is '+n(p.s)+' sq ft in '+p.z+'. By area and frontage it could hold up to <b>'+p.p+' lots</b> under a 5,000 sq ft minimum (today: '+p.q+'). Potential only: we did not check where the house sits, wetlands or other limits.'}
   else if(p.b==='u'){ans.className='red';ans.innerHTML='<b>'+p.a+'</b> is '+n(p.s)+' sq ft, under 5,000. A 5,000 sq ft minimum would not apply to this lot.'}
   else{ans.className='warm';ans.innerHTML='<b>'+p.a+'</b> is '+n(p.s)+' sq ft. The minimum in '+p.z+' is '+n(p.m)+', so your lot is '+n(p.m-p.s)+' sq ft below it. A 5,000 sq ft minimum would meet the lot-size rule.'}
-  if(e.pane&&e.pane==='pUnch')setPane('pUnch',true);
+  if(e.pane==='pUnch'||e.pane==='pErr'){setPane(e.pane,true);document.getElementById('extra').open=true}
   if(e.l){var b=e.l.getBounds();map.flyToBounds(b,{maxZoom:18,padding:[60,60],animate:!reduce,duration:1.2});setTimeout(function(){e.l.openPopup(b.getCenter())},1300)}}
 var mq2=document.getElementById('mq'),mres=document.getElementById('mres'),mmsg=document.getElementById('mmsg');
 function mshow(list){mres.innerHTML='';mmsg.hidden=true;var cur=list.slice(0,7);
   cur.forEach(function(e){var li=document.createElement('li');li.textContent=e.a+' ('+e.p.z+')'+(e.k==='c'?' - potential data issue':(e.k==='n'?' - unchanged':''));li.onmousedown=function(ev){ev.preventDefault();mpick(e)};li.ontouchend=function(ev){ev.preventDefault();mpick(e)};mres.appendChild(li)});
   mres.hidden=!cur.length;
   if(!cur.length&&mq2.value.trim()){mmsg.hidden=false;mmsg.textContent="No match among the lots on this map. It may meet its district's minimum already, be in another district, or be another kind of property."}}
-function mpick(e){mres.hidden=true;mmsg.hidden=true;mq2.value=e.a;mq2.blur();setPane(e.pane,true);var b=e.l.getBounds();map.flyToBounds(b,{maxZoom:18,padding:[80,80],animate:!reduce,duration:1.2});setTimeout(function(){e.l.openPopup(b.getCenter())},1300)}
+function mpick(e){mres.hidden=true;mmsg.hidden=true;mq2.value=e.a;mq2.blur();setPane(e.pane,true);if(e.pane==='pUnch'||e.pane==='pErr')document.getElementById('extra').open=true;var b=e.l.getBounds();map.flyToBounds(b,{maxZoom:18,padding:[80,80],animate:!reduce,duration:1.2});setTimeout(function(){e.l.openPopup(b.getCenter())},1300)}
 mq2.addEventListener('input',function(){mshow(find(mq2.value))});
 mq2.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();var l=find(mq2.value);if(l.length)mpick(l[0])}});
 q.addEventListener('input',function(){show(find(q.value))});
