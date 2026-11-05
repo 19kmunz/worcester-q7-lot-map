@@ -84,6 +84,8 @@ body.explore #maptop{left:14px}
 .srcs{margin:8px 0 0;padding-left:18px;font-size:.84rem;color:var(--muted)}.srcs li{margin:3px 0}
 #mres li{padding:9px 12px;border-bottom:1px solid #eee;cursor:pointer;font-size:.92rem}
 #mres li:hover{background:#eef4fa}
+#recenter{position:fixed;left:calc(40% + 14px);bottom:16px;z-index:2400;padding:9px 14px;border:0;border-radius:999px;background:#fff;color:var(--accent);font:600 14px system-ui,sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.25);cursor:pointer}
+#recenter[hidden]{display:none}
 #explore{display:block;position:fixed;right:14px;bottom:16px;z-index:3000;padding:10px 16px;border-radius:999px;border:0;background:var(--accent);color:#fff;font:600 14px system-ui,sans-serif;box-shadow:0 3px 14px rgba(0,0,0,.3);cursor:pointer}
 body.explore{overflow:hidden}
 body.explore #map{left:0}
@@ -108,6 +110,7 @@ body.explore .story *{pointer-events:none!important}
   body.explore #maptop{left:10px}
   #legend .lb{width:calc(100vw - 20px);max-height:calc(100vh - 120px)}
   #legend .lh{padding:0 11px}
+  #recenter{left:12px;bottom:14px;padding:11px 14px}
   #explore{right:12px;bottom:14px;padding:11px 16px;font-size:15px}
   
 }
@@ -129,11 +132,12 @@ body.explore .story *{pointer-events:none!important}
       <label><input type="checkbox" id="lg_pUnch"><span><span class="sw" style="background:rgba(120,140,170,.18);border:1.5px dashed #6f87a6"></span> Unchanged lots<span class="sub">Today&rsquo;s rules already allow the same number of lots as 5,000 sq ft would, so this change would not affect them.</span></span></label>
       <label><input type="checkbox" id="lg_pErr"><span><span class="sw" style="background:rgba(130,130,130,.2);border:1.5px dashed #777"></span> Potential data issues<span class="sub">Lots where the Question 7 data does not match the assessor record. Not counted in any total.</span></span></label>
     </details>
-    <p class="note">The story turns layers on as you scroll. Use the boxes to change them. Click a lot for details.</p>
+    <p class="note">The story turns layers on as you scroll. Use the boxes to change them. Click a lot for details. Zoom with the + and - buttons, a double-click, or Ctrl/&#8984; and scroll.</p>
   </div>
 </div>
 <div id="msearch"><input id="mq" type="search" placeholder="Search an address, e.g. 102 Clark St" aria-label="Search the map by address" autocomplete="off"><ul id="mres" hidden></ul><div id="mmsg" hidden></div></div>
 </div>
+<button id="recenter" type="button" hidden>Back to story view</button>
 <button id="explore" type="button">Full screen map</button>
 
 <main class="story" id="story">
@@ -151,7 +155,6 @@ body.explore .story *{pointer-events:none!important}
     </div>
   </section>
   <div class="gap"></div>
-
   <section class="step" data-key="benefits">
     <div class="card">
       <p class="kicker">Why it makes sense</p>
@@ -164,7 +167,6 @@ body.explore .story *{pointer-events:none!important}
     </div>
   </section>
   <div class="gap"></div>
-
   <section class="step" data-key="where">
     <div class="card">
       <p class="kicker">Where it would apply</p>
@@ -179,11 +181,19 @@ body.explore .story *{pointer-events:none!important}
     </div>
   </section>
   <div class="gap"></div>
-
+  <section class="step" data-key="everything">
+    <div class="card">
+      <p class="kicker">It&rsquo;s already here</p>
+      <h2>Neighborhoods already look like this</h2>
+      <p>Across these districts, <b>3,937 homes</b> already stand on lots smaller than today&rsquo;s minimum, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#f97316"></span>orange</span>. Another 677 are under 5,000 sq ft, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#991b1b"></span>dark red</span>, which this change would not reach.</p>
+      <p>Next: which of the <i>bigger</i> lots could split.</p>
+    </div>
+  </section>
+  <div class="gap"></div>
   <section class="step" data-key="which">
     <div class="card">
       <p class="kicker">Which lots could split</p>
-      <h2>Not every lot is big enough</h2>
+      <h2>So what would be big enough to split?</h2>
       <div class="big blue">3,991</div>
       <p class="cap">potential new lots, on 3,773 lots that could gain at least one more.</p>
       <p>These are the lots with enough area and street frontage to make more lots than today&rsquo;s rules allow. The darker the blue, the more lots it could become. Lots that wouldn&rsquo;t change are hidden; turn them on in the legend.</p>
@@ -193,12 +203,25 @@ body.explore .story *{pointer-events:none!important}
     </div>
   </section>
   <div class="gap"></div>
-
+  <section class="step" data-key="burncoat">
+    <div class="card">
+      <p class="kicker">Zoom in: Burncoat</p>
+      <h2>Big lots and small lots, side by side</h2>
+      <p>On the same streets, large lots that could split sit next to homes already on smaller lots. The neighborhood works both ways.</p>
+      <p><b>Is your house below the minimum lot size?</b> Look up your address.</p>
+      <div class="find"><input id="q" type="search" placeholder="Start typing, e.g. 102 Clark St" aria-label="Look up an address" autocomplete="off"></div>
+      <ul id="sres" hidden></ul>
+      <div id="answer" hidden></div>
+      <p class="fine" style="margin-top:12px">Homes below the minimum can face lengthy reviews just to renovate or repair, because they don&rsquo;t match today&rsquo;s zoning.</p>
+    </div>
+  </section>
+  <div class="gap"></div>
   <section class="step" data-key="explain">
     <div class="card">
       <p class="kicker">What it enables</p>
-      <h2>A home, not just a unit</h2>
-      <p>A homeowner with a big lot could split it, build a second house, and sell it or hand it to their kids to start building equity.</p>
+      <h2>Small scale flexibility</h2>
+      <p>This is gentle growth, not high-rises. One house at a time, on streets that already exist, with the same yards and setbacks. A homeowner with a big lot could split it and build a house, which gives neighbors somewhere new to live.</p>
+      <p>They could sell it, or hand it to their kids to give them a head start on equity. An ADU is different: it stays on the same lot, must be much smaller, and can only be rented.</p>
       <div class="pair">
         <figure>
           <svg viewBox="0 0 220 150" role="img" aria-label="A lot split into two lots, each with its own house">
@@ -225,30 +248,6 @@ body.explore .story *{pointer-events:none!important}
         </figure>
       </div>
       <p class="fine">Illustration, not to scale.</p>
-    </div>
-  </section>
-  <div class="gap"></div>
-
-  <section class="step" data-key="everything">
-    <div class="card">
-      <p class="kicker">It&rsquo;s already here</p>
-      <h2>Neighborhoods already look like this</h2>
-      <p>Across these districts, <b>3,937 homes</b> already stand on lots smaller than today&rsquo;s minimum, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#f97316"></span>orange</span>. Another 677 are under 5,000 sq ft, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#991b1b"></span>dark red</span>, which this change would not reach.</p>
-      <p>The <span class="chip" style="padding:0 8px"><span class="sw" style="background:#2171b5"></span>blue</span> lots are the big ones that could split.</p>
-    </div>
-  </section>
-  <div class="gap"></div>
-
-  <section class="step" data-key="burncoat">
-    <div class="card">
-      <p class="kicker">Zoom in: Burncoat</p>
-      <h2>Big lots and small lots, side by side</h2>
-      <p>On the same streets, large lots that could split sit next to homes already on smaller lots. The neighborhood works both ways.</p>
-      <p><b>Is your house below the minimum lot size?</b> Look up your address.</p>
-      <div class="find"><input id="q" type="search" placeholder="Start typing, e.g. 102 Clark St" aria-label="Look up an address" autocomplete="off"></div>
-      <ul id="sres" hidden></ul>
-      <div id="answer" hidden></div>
-      <p class="fine" style="margin-top:12px">Homes below the minimum can face lengthy reviews just to renovate or repair, because they don&rsquo;t match today&rsquo;s zoning.</p>
     </div>
   </section>
   <div class="gap"></div>
@@ -290,6 +289,7 @@ L.Popup.mergeOptions({autoPanPaddingTopLeft:[12,70],autoPanPaddingBottomRight:[1
 var map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:0.25,scrollWheelZoom:false,doubleClickZoom:true});
 L.control.zoom({position:'topright'}).addTo(map);
 map.attributionControl.setPrefix(false);
+map.getContainer().addEventListener('wheel',function(e){if(map.scrollWheelZoom.enabled()||!(e.ctrlKey||e.metaKey))return;e.preventDefault();var d=-e.deltaY*(e.deltaMode===1?0.05:0.01);map.setZoomAround(map.mouseEventToContainerPoint(e),Math.max(map.getMinZoom(),Math.min(18,map.getZoom()+d)),{animate:false})},{passive:false});
 function applyPass(){document.getElementById('map').classList.toggle('pass',mq.matches&&!document.body.classList.contains('explore'))}
 applyPass();
 L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,opacity:.42,attribution:'Basemap: USGS The National Map'}).addTo(map);
@@ -329,21 +329,27 @@ var STATE={
  cover:{view:'city',on:['pZones'],zones:'neutral'},
  benefits:{view:'city',on:['pZones'],zones:'neutral'},
  where:{view:'city',on:['pZones'],zones:'hi'},
+ everything:{view:'city',on:['pZones','pExistB','pExistU'],zones:'lo'},
  which:{view:'city',on:['pZones','pOpp'],zones:'lo'},
- explain:{view:'city',on:['pZones','pOpp'],zones:'lo'},
- everything:{view:'city',on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'},
  burncoat:{view:'burn',z:16,on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'},
+ explain:{view:'burn',z:16,on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'},
  end:{view:'city',on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'}
 };
-function go(key){
+var manual=false,flying=false,flyTimer=null;
+function viewFor(s){flying=true;clearTimeout(flyTimer);flyTimer=setTimeout(function(){flying=false},reduce?150:2200);
+  if(s.view==='city')map.flyToBounds(CITY,{animate:!reduce,duration:1.5,padding:[10,10]});
+  else map.flyTo(BURN,s.z,{animate:!reduce,duration:1.5})}
+function setManual(m){manual=m;document.getElementById('recenter').hidden=!m||document.body.classList.contains('explore')}
+function go(key,force){
   var s=STATE[key];if(!s)return;
   ['pZones','pOpp','pExistB','pExistU'].forEach(function(p){setPane(p,s.on.indexOf(p)>=0)});
   if(s.zones)useZones(s.zones==='hi'?zonesHi:(s.zones==='neutral'?zonesNeutral:zonesLo));
-  var opts={animate:!reduce,duration:1.5,easeLinearity:.25};
-  if(s.view==='city')map.flyToBounds(CITY,{animate:!reduce,duration:1.5,padding:[10,10]});
-  else map.flyTo(BURN,s.z,{animate:!reduce,duration:1.5});
+  if(manual&&!force)return;
+  viewFor(s);
 }
 map.fitBounds(CITY);
+map.on('movestart',function(){if(!flying)setManual(true)});
+document.getElementById('recenter').addEventListener('click',function(){setManual(false);if(current)go(current,true)});
 
 var steps=[].slice.call(document.querySelectorAll('.step'));
 var current=null;
@@ -359,7 +365,7 @@ lgt.addEventListener('click',function(){lgOpen(lg.classList.contains('closed'))}
 lgOpen(!mq.matches);
 var ex=document.getElementById('explore');
 function exLabel(on){return mq.matches?(on?'Back to the story':'Explore the map'):(on?'Exit full screen':'Full screen map')}
-function setExplore(on){document.body.classList.toggle('explore',on);ex.textContent=exLabel(on);applyPass();
+function setExplore(on){document.body.classList.toggle('explore',on);document.getElementById('recenter').hidden=on||!manual;ex.textContent=exLabel(on);applyPass();
   map.scrollWheelZoom[on?'enable':'disable']();
   if(!mq.matches){var d=document.documentElement;if(on&&d.requestFullscreen)d.requestFullscreen().catch(function(){});else if(!on&&document.fullscreenElement)document.exitFullscreen()}
   setTimeout(function(){map.invalidateSize()},80)}
@@ -402,7 +408,7 @@ mq2.addEventListener('input',function(){mshow(find(mq2.value))});
 mq2.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();var l=find(mq2.value);if(l.length)mpick(l[0])}});
 q.addEventListener('input',function(){show(find(q.value))});
 q.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();var l=find(q.value);if(l.length)pick(l[0])}});
-q.addEventListener('focus',function(){go('burncoat')});
+q.addEventListener('focus',function(){if(!manual)go('burncoat')});
 })();
 </script>
 </body>
