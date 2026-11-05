@@ -1,27 +1,374 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Worcester Question 7: 5,000 sq ft lot minimum petition</title>
-<style>html{background:#fff;color-scheme:light}body{background:#fff;font-family:Georgia,serif;max-width:760px;margin:40px auto;padding:0 18px;line-height:1.5;color:#1d1d1d}
-h1{line-height:1.15}a{color:#a34100}.ask{background:#fdf1e6;border-left:5px solid #d95f02;padding:10px 14px}
-.card{border:1px solid #d9d9d9;border-radius:8px;padding:14px 18px;margin:16px 0}.card h2{margin:0 0 4px;font-size:1.15rem}
-.big{font-size:2rem;font-weight:700;color:#a34100;line-height:1.1;font-family:system-ui,sans-serif}
-.tag{display:inline-block;font:600 .75rem system-ui,sans-serif;background:#eef4fa;border-radius:4px;padding:2px 7px;margin-bottom:6px}
-.card.b .tag{background:#fdf1e6}small{color:#555}ul{padding-left:20px}li{margin:4px 0}</style></head><body>
-<h1>Allow single-family homes on 5,000 sq ft lots in Worcester</h1>
-<p class="ask">A proposed zoning amendment for the RS-10, RS-7 and RL-7 districts, following Worcester's 59.1% to 40.9% vote for Question 7 on November 3, 2026. <small>(Election-night results.)</small></p>
-<p>Two maps show two different things. Neither is a promise of construction.</p>
+<title>Worcester already said yes: a story about Question 7</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--ink:#1d1d1d;--muted:#5a5a5a;--accent:#a34100;--yes:#E17C05;--no:#55AB9E;--blue:#2171b5;--card:#fff}
+*{box-sizing:border-box}
+html{background:#f4f1ea;color-scheme:light;scroll-behavior:smooth}
+body{margin:0;font:17px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+#map{position:fixed;top:0;bottom:0;right:0;left:40%;background:#f4f1ea;z-index:1}
+.leaflet-container{background:#f4f1ea;font:inherit}
+.leaflet-pane.fade{transition:opacity .7s ease}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:2000}
+.story{position:relative;z-index:1000;width:40%;pointer-events:none}
+.step{min-height:100vh;display:flex;align-items:center;padding:6vh 28px}
+.card{pointer-events:auto;background:var(--card);border-radius:12px;padding:26px 28px;box-shadow:0 6px 30px rgba(0,0,0,.14);width:100%;opacity:.55;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.step.active .card{opacity:1;transform:none}
+.kicker{font:700 12px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1,h2{font-family:Georgia,"Times New Roman",serif;line-height:1.12;margin:0 0 12px}
+h1{font-size:2.35rem}h2{font-size:1.65rem}
+p{margin:0 0 12px}
+.big{font:800 4.6rem/1 system-ui,sans-serif;color:var(--yes);margin:4px 0 2px;letter-spacing:-.02em}
+.big.blue{color:var(--blue);font-size:3.6rem}
+.cap{color:var(--muted);font-size:.95rem}
+.ask{font-family:Georgia,serif;font-size:1.25rem;line-height:1.3;border-left:4px solid var(--accent);padding-left:12px;margin:14px 0 0}
+.hint{margin-top:16px;color:var(--muted);font-size:.9rem}
+ul.benefits{list-style:none;padding:0;margin:8px 0 0}
+ul.benefits li{display:flex;gap:12px;margin:0 0 14px}
+ul.benefits .dot{flex:0 0 34px;height:34px;border-radius:50%;background:#fdf1e6;border:2px solid var(--yes);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent)}
+ul.benefits b{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;background:#f7f7f7;border:1px solid #e1e1e1;border-radius:999px;padding:3px 10px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid #0003}
+.ramp{display:flex;gap:0;margin:8px 0 2px;border-radius:4px;overflow:hidden;border:1px solid #bbb}
+.ramp span{flex:1;height:14px}
+.ramplab{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 6px}
+.pair figure{margin:0;background:#f8f6f0;border:1px solid #e6e1d4;border-radius:10px;padding:8px 8px 6px}
+.pair svg{width:100%;height:auto;display:block}
+.pair figcaption{font-size:.82rem;line-height:1.3;margin-top:4px}
+.pair figcaption b{display:block}
+.fine{font-size:.82rem;color:var(--muted)}
+.find{margin-top:10px;display:flex;gap:6px}
+.find input{flex:1;min-width:0;padding:11px 12px;border:1.5px solid #bbb;border-radius:8px;font:inherit}
+#sres{margin:6px 0 0;padding:0;list-style:none;border:1px solid #ddd;border-radius:8px;overflow:hidden}
+#sres li{padding:9px 12px;border-bottom:1px solid #eee;cursor:pointer;font-size:.95rem}
+#sres li:hover,#sres li.on{background:#eef4fa}
+#answer{margin-top:10px;padding:12px 14px;border-radius:10px;background:#eef4fa;border-left:4px solid var(--blue);font-size:.96rem}
+#answer.warm{background:#fff1e3;border-color:var(--yes)}
+#answer.red{background:#fde8e8;border-color:#991b1b}
+#answer.none{background:#f3f3f3;border-color:#999}
+.cta{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+.btn{display:inline-block;padding:10px 14px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;font-size:.95rem}
+.btn.alt{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}
+a{color:var(--accent)}
+.gap{display:none}
+#legend{position:fixed;left:calc(40% + 14px);bottom:16px;z-index:1500;background:rgba(255,255,255,.95);border-radius:10px;font-size:.84rem;box-shadow:0 2px 12px rgba(0,0,0,.2);width:300px;max-width:calc(60% - 28px)}
+#legend .lh{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;padding:9px 12px;font:600 .9rem system-ui,sans-serif;cursor:pointer;text-align:left}
+#legend .lb{padding:0 12px 10px;max-height:46vh;overflow:auto}
+#legend.closed .lb{display:none}
+#legend label{display:flex;align-items:flex-start;gap:8px;margin:7px 0;cursor:pointer;line-height:1.3}
+#legend input{margin-top:2px;flex:0 0 auto}
+#legend .sub{display:flex;flex-wrap:wrap;gap:4px 12px;margin:2px 0 0;font-size:.78rem;color:var(--muted)}
+#legend .sub span{display:inline-flex;align-items:center;gap:4px}
+#legend .sw{width:11px;height:11px}
+#legend .note{font-size:.76rem;color:var(--muted);margin:4px 0 0}
+.pp{border-collapse:collapse;margin:4px 0}.pp td{padding:1px 10px 1px 0;vertical-align:top}.pp td:last-child{text-align:right;font-weight:600}
+.pn{margin-top:6px;padding:6px 8px;border-radius:6px;background:#fff1e3;border-left:3px solid #E17C05;font-size:.85rem}
+.pn.red{background:#fde8e8;border-color:#991b1b}
+.srcs{margin:8px 0 0;padding-left:18px;font-size:.84rem;color:var(--muted)}.srcs li{margin:3px 0}
+#explore{display:block;position:fixed;right:14px;bottom:16px;z-index:3000;padding:10px 16px;border-radius:999px;border:0;background:var(--accent);color:#fff;font:600 14px system-ui,sans-serif;box-shadow:0 3px 14px rgba(0,0,0,.3);cursor:pointer}
+body.explore{overflow:hidden}
+body.explore #map{left:0}
+body.explore .story{opacity:0;pointer-events:none}
+body.explore .story *{pointer-events:none!important}
+body.explore #legend{left:14px}
+.leaflet-tooltip{font:14px/1.35 system-ui,sans-serif}
+/* ---------- phone / narrow ---------- */
+@media (max-width:899px){
+  body{font-size:16px}
+  #map{left:0}
+  #map.pass{pointer-events:none}
+  body.explore #map{pointer-events:auto}
+  .story{width:100%;transition:opacity .3s}
+  .step{min-height:0;display:block;padding:0 14px}
+  .card{background:rgba(255,255,255,.88);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);padding:18px 18px;opacity:1;transform:none;box-shadow:0 4px 20px rgba(0,0,0,.18)}
+  .gap{display:block;height:58vh}
+  .gap.first{height:30vh}
+  h1{font-size:1.85rem}h2{font-size:1.4rem}
+  .big{font-size:3.6rem}.big.blue{font-size:3rem}
+  #legend{left:10px;right:auto;top:10px;bottom:auto;width:auto;max-width:78%;font-size:.78rem}
+  #legend .lh{padding:7px 10px}
+  body.explore #legend{left:10px}
+  #explore{right:12px;bottom:14px;padding:11px 16px;font-size:15px}
+  
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="map"></div>
+<div id="legend">
+  <button class="lh" id="lgt" type="button" aria-expanded="true" aria-controls="lgb"><span>Map layers</span><span id="lgc">&#9662;</span></button>
+  <div class="lb" id="lgb">
+    <label><input type="checkbox" id="lg_pZones" checked><span>Zoning districts<span class="sub"><span><span class="sw" style="background:#c2570c"></span>RS-10 (10,000 sq ft)</span><span><span class="sw" style="background:#e6ab02"></span>RS-7, RL-7 (7,000 sq ft)</span></span></span></label>
+    <label><input type="checkbox" id="lg_pOpp" checked><span>Lots that could split<span class="sub"><span><span class="sw" style="background:#bdd7e7"></span><span class="sw" style="background:#6baed6"></span><span class="sw" style="background:#2171b5"></span><span class="sw" style="background:#08306b"></span>darker = more lots</span></span></span></label>
+    <label><input type="checkbox" id="lg_pExistB" checked><span><span class="sw" style="background:#f97316"></span> Homes below the district minimum</span></label>
+    <label><input type="checkbox" id="lg_pExistU" checked><span><span class="sw" style="background:#991b1b"></span> Homes under 5,000 sq ft<span class="sub">A 5,000 sq ft minimum would not reach these</span></span></label>
+    <p class="note">The story turns layers on as you scroll. Use the boxes to change them. Click a lot for details.</p>
+  </div>
+</div>
+<button id="explore" type="button">Full screen map</button>
 
-<div class="card"><span class="tag">MAP 1: WHAT COULD CHANGE</span>
-<h2><a href="map.html">Lots that could be subdivided</a></h2>
-<div class="big">3,991</div>
-<p>new single-family lots could be created by subdividing existing large lots, beyond what today's area and frontage minimums already allow. This is potential for owners who choose to add a home on a large lot of their own. 68 more lots are marked as a potential data issue and are not counted.</p>
-<small>Data: <a href="data/opportunity-parcels.csv">CSV</a> &middot; <a href="data/opportunity-parcels.geojson">GeoJSON</a></small></div>
+<main class="story" id="story">
+  <div class="gap first"></div>
 
-<div class="card b"><span class="tag">MAP 2: WHAT ALREADY EXISTS</span>
-<h2><a href="existing-lots.html">Homes already below the district minimum</a></h2>
-<div class="big">3,937</div>
-<p>existing detached single-family homes already sit on lots of 5,000 sq ft or more that are smaller than their district's minimum (10,000 sq ft in RS-10, 7,000 sq ft in RS-7 and RL-7). Their median year built is 1932. A further 677 homes are on lots under 5,000 sq ft, which a 5,000 sq ft minimum would not reach.</p>
-<small>Data: <a href="data/existing-lots-below-minimum.csv">CSV</a></small></div>
+  <section class="step" data-key="cover">
+    <div class="card">
+      <p class="kicker">Worcester &middot; Question 7</p>
+      <h1>Worcester already said yes.</h1>
+      <div class="big">59.1%</div>
+      <p class="cap">of Worcester voters backed Question 7: 26,691 yes to 18,448 no.</p>
+      <p>Question 7 asked whether a single-family home could be built on a lot as small as 5,000 square feet with 50 feet of frontage. Statewide, it looks like it will fall short.</p>
+      <p class="ask">If Worcester voted in favor, why not pass it ourselves?</p>
+      <p class="hint">Scroll to see what it would change &darr;</p>
+    </div>
+  </section>
+  <div class="gap"></div>
 
-<p><small>Map 1 looks forward: large lots that could gain another home. Map 2 looks back: homes already built on lots of this size. Parcel data: Community Scale Question 7 lots tool and MassGIS assessor parcels (FY2026). Zoning: City of Worcester. Counts are potential or descriptive, not forecasts: the data does not show buildings, wetlands or easements, and frontage is not tested on Map 2.</small></p>
-</body></html>
+  <section class="step" data-key="benefits">
+    <div class="card">
+      <p class="kicker">Why it makes sense</p>
+      <h2>A small change with three big upsides</h2>
+      <ul class="benefits">
+        <li><span class="dot">1</span><span><b>Less bureaucracy</b>When the rule fits the lots we already have, fewer owners have to ask the Zoning Board for an exception. That saves planning staff time, and applicants&rsquo; time too.</span></li>
+        <li><span class="dot">2</span><span><b>Gentle growth</b>One more home at a time, on streets that already exist. Yard and setback rules stay exactly as they are, so neighborhoods keep their space.</span></li>
+        <li><span class="dot">3</span><span><b>Flexibility for homeowners</b>It&rsquo;s an option, not a requirement. No one is forced to sell, subdivide or build.</span></li>
+      </ul>
+    </div>
+  </section>
+  <div class="gap"></div>
+
+  <section class="step" data-key="where">
+    <div class="card">
+      <p class="kicker">Where it would apply</p>
+      <h2>Three residential districts</h2>
+      <p>Today, these districts require more than 5,000 square feet for a single-family lot:</p>
+      <div class="chips">
+        <span class="chip"><span class="sw" style="background:#c2570c"></span>RS-10: 10,000 sq ft</span>
+        <span class="chip"><span class="sw" style="background:#e6ab02"></span>RS-7 and RL-7: 7,000 sq ft</span>
+      </div>
+      <p>RS-10 covers the Indian Lake area. RS-7 and RL-7 reach across the north, east and south of the city. Business, industrial and other districts aren&rsquo;t touched, and neither is RG-5, which already allows 5,000.</p>
+      <p class="fine">Applies to lots with at least 50 feet of frontage.</p>
+    </div>
+  </section>
+  <div class="gap"></div>
+
+  <section class="step" data-key="which">
+    <div class="card">
+      <p class="kicker">Which lots could split</p>
+      <h2>Not every lot is big enough</h2>
+      <div class="big blue">3,991</div>
+      <p class="cap">potential new lots, on 4,082 lots large enough to split.</p>
+      <p>These are the lots with enough area and street frontage to make at least one more 5,000 sq ft lot. The darker the blue, the more lots it could become.</p>
+      <div class="ramp"><span style="background:#bdd7e7"></span><span style="background:#6baed6"></span><span style="background:#2171b5"></span><span style="background:#08306b"></span></div>
+      <div class="ramplab"><span>1 more lot</span><span>2</span><span>3</span><span>4 or more</span></div>
+      <p class="fine" style="margin-top:8px">Potential only. Counts are what the rule would allow, not what will be built.</p>
+    </div>
+  </section>
+  <div class="gap"></div>
+
+  <section class="step" data-key="explain">
+    <div class="card">
+      <p class="kicker">What it enables</p>
+      <h2>A home, not just a unit</h2>
+      <p>A homeowner with a big lot could split it, build a second house, and sell it or hand it to their kids to start building equity.</p>
+      <div class="pair">
+        <figure>
+          <svg viewBox="0 0 220 150" role="img" aria-label="A lot split into two lots, each with its own house">
+            <rect x="8" y="12" width="204" height="108" rx="4" fill="#e8f1df" stroke="#9db88a"/>
+            <line x1="110" y1="12" x2="110" y2="120" stroke="#33691e" stroke-width="2.5" stroke-dasharray="6 4"/>
+            <g><rect x="30" y="52" width="56" height="46" fill="#9ecae1" stroke="#2171b5"/><polygon points="26,52 58,28 90,52" fill="#2171b5"/></g>
+            <g><rect x="134" y="52" width="56" height="46" fill="#fdd0a2" stroke="#E17C05"/><polygon points="130,52 162,28 194,52" fill="#E17C05"/></g>
+            <rect x="8" y="124" width="204" height="14" fill="#cfcfcf"/>
+            <text x="110" y="135" font-size="9" text-anchor="middle" fill="#555" font-family="system-ui">street</text>
+            <text x="162" y="112" font-size="9" text-anchor="middle" fill="#a34100" font-family="system-ui" font-weight="700">new home</text>
+          </svg>
+          <figcaption><b>Split the lot</b>Two lots, two owners. The new home can be owned, sold or passed on.</figcaption>
+        </figure>
+        <figure>
+          <svg viewBox="0 0 220 150" role="img" aria-label="One lot with a house and a small accessory unit behind it">
+            <rect x="8" y="12" width="204" height="108" rx="4" fill="#e8f1df" stroke="#9db88a"/>
+            <g><rect x="24" y="60" width="78" height="46" fill="#9ecae1" stroke="#2171b5"/><polygon points="20,60 63,32 106,60" fill="#2171b5"/></g>
+            <g><rect x="146" y="30" width="38" height="26" fill="#d9d9d9" stroke="#777"/><polygon points="143,30 165,16 187,30" fill="#777"/></g>
+            <rect x="8" y="124" width="204" height="14" fill="#cfcfcf"/>
+            <text x="110" y="135" font-size="9" text-anchor="middle" fill="#555" font-family="system-ui">street</text>
+            <text x="165" y="70" font-size="9" text-anchor="middle" fill="#555" font-family="system-ui" font-weight="700">ADU</text>
+          </svg>
+          <figcaption><b>Add an ADU</b>One lot, one owner. The small unit stays on the lot and can only be rented.</figcaption>
+        </figure>
+      </div>
+      <p class="fine">Illustration, not to scale.</p>
+    </div>
+  </section>
+  <div class="gap"></div>
+
+  <section class="step" data-key="everything">
+    <div class="card">
+      <p class="kicker">It&rsquo;s already here</p>
+      <h2>Neighborhoods already look like this</h2>
+      <p>Across these districts, <b>3,937 homes</b> already stand on lots smaller than today&rsquo;s minimum, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#f97316"></span>orange</span>. Another 677 are under 5,000 sq ft, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#991b1b"></span>dark red</span>, which this change would not reach.</p>
+      <p>The <span class="chip" style="padding:0 8px"><span class="sw" style="background:#2171b5"></span>blue</span> lots are the big ones that could split.</p>
+    </div>
+  </section>
+  <div class="gap"></div>
+
+  <section class="step" data-key="burncoat">
+    <div class="card">
+      <p class="kicker">Zoom in: Burncoat</p>
+      <h2>Big lots and small lots, side by side</h2>
+      <p>On the same streets, large lots that could split sit next to homes already on smaller lots. The neighborhood works both ways.</p>
+      <p><b>Is your house below the minimum lot size?</b> Look up your address.</p>
+      <div class="find"><input id="q" type="search" placeholder="Start typing, e.g. 102 Clark St" aria-label="Look up an address" autocomplete="off"></div>
+      <ul id="sres" hidden></ul>
+      <div id="answer" hidden></div>
+      <p class="fine" style="margin-top:12px">Homes below the minimum can face lengthy reviews just to renovate or repair, because they don&rsquo;t match today&rsquo;s zoning.</p>
+    </div>
+  </section>
+  <div class="gap"></div>
+
+  <section class="step" data-key="end">
+    <div class="card">
+      <p class="kicker">The bottom line</p>
+      <h2>Common sense, and already supported</h2>
+      <p><b>Most lots that could split won&rsquo;t.</b> Splitting costs money, and many owners will never want to. It&rsquo;s a choice, and no one is forced to sell, subdivide or build.</p>
+      <p>We didn&rsquo;t look at other limits, like where a house sits on its lot, wetlands, slopes or easements. Historic, environmental and other protections still apply, so we keep building right while we build what we need.</p>
+      <p>We believe in a future for Worcester with more homes in the neighborhoods that already exist. <b>Pass this common-sense change the public already voted for.</b></p>
+      <div class="cta">
+        <a class="btn" href="data/opportunity-parcels.csv">Download: lots that could split (CSV)</a>
+        <a class="btn alt" href="data/existing-lots-below-minimum.csv">Download: homes below the minimum (CSV)</a>
+      </div>
+      <p class="fine" style="margin-bottom:2px"><b>Sources</b></p>
+      <ul class="srcs">
+        <li>Election results: <a href="https://www.worcesterma.gov/election-results/20261103.pdf" target="_blank" rel="noopener">City of Worcester unofficial election results, Nov. 3, 2026</a>.</li>
+        <li>Lots that could split: <a href="https://snap.communityscale.io/question-7-lots/" target="_blank" rel="noopener">Community Scale, Question 7 Opportunities</a>.</li>
+        <li>Addresses, lot sizes and year built: <a href="https://www.mass.gov/info-details/massgis-data-property-tax-parcels" target="_blank" rel="noopener">MassGIS Property Tax Parcels</a> (Level 3 assessor parcels, FY2026).</li>
+        <li>Zoning rules and districts: <a href="https://www.worcesterma.gov/planning-regulatory/zoning-ordinance-map" target="_blank" rel="noopener">City of Worcester Zoning Ordinance &amp; Map</a>, including <a href="https://www.worcesterma.gov/planning-regulatory/document-center/zoning-ord.pdf" target="_blank" rel="noopener">Table 4.2, Permitted Dimensions by District</a>.</li>
+        <li>Basemap: <a href="https://www.usgs.gov/programs/national-geospatial-program/national-map" target="_blank" rel="noopener">USGS The National Map</a>.</li>
+      </ul>
+      <p class="fine">Counts are potential and descriptive, not forecasts.</p>
+    </div>
+  </section>
+  <div class="gap" style="height:40vh"></div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data/story-data.js"></script>
+<script>
+(function(){
+var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var mq=window.matchMedia('(max-width: 899px)');
+var CITY=[[42.2100,-71.8840],[42.3412,-71.7312]];
+var BURN=[42.3090,-71.7910];
+var map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:0.25,scrollWheelZoom:false,doubleClickZoom:true});
+L.control.zoom({position:'topright'}).addTo(map);
+map.attributionControl.setPrefix(false);
+function applyPass(){document.getElementById('map').classList.toggle('pass',mq.matches&&!document.body.classList.contains('explore'))}
+applyPass();
+L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,opacity:.42,attribution:'Basemap: USGS The National Map'}).addTo(map);
+
+function pane(name,z){var p=map.createPane(name);p.style.zIndex=z;p.classList.add('fade');p.style.opacity=0;return L.svg({pane:name,padding:.4})}
+var rZones=pane('pZones',420),rExB=pane('pExistB',440),rExU=pane('pExistU',445),rOpp=pane('pOpp',450);
+
+function n(x){return x.toLocaleString()}
+var ZC={'RS-10':'#c2570c','RS-7':'#e6ab02','RL-7':'#e6ab02'};
+function zstyle(hi){return function(f){var z=f.properties.z,c=ZC[z];
+  if(hi==='neutral') return {color:'#fff',weight:.8,fillColor:'#e2ddd0',fillOpacity:.6};
+  if(hi&&c) return {color:'#fff',weight:.8,fillColor:c,fillOpacity:.8};
+  return {color:'#fff',weight:.8,fillColor:c&&!hi?c:'#e2ddd0',fillOpacity:hi?.55:(c?.28:.5)}}}
+var zonesHi=L.geoJSON(STORY.zones,{renderer:rZones,style:zstyle(true),onEachFeature:function(f,l){var z=f.properties.z;if(ZC[z])l.bindTooltip(z+': '+(z==='RS-10'?'10,000':'7,000')+' sq ft minimum today',{sticky:true})}}).addTo(map);
+var zonesLo=L.geoJSON(STORY.zones,{renderer:rZones,style:zstyle(false),interactive:false});
+var zonesNeutral=L.geoJSON(STORY.zones,{renderer:rZones,style:zstyle('neutral'),interactive:false});
+
+var ramp=['#bdd7e7','#6baed6','#2171b5','#08306b'];
+var oppL={},exL={};
+var opp=L.geoJSON(STORY.opp,{renderer:rOpp,style:function(f){var k=Math.max(1,Math.min(4,f.properties.u||1));return {color:'#1b3a57',weight:.4,fillColor:ramp[k-1],fillOpacity:.92}},
+  onEachFeature:function(f,l){var p=f.properties;l.bindPopup('<b>'+p.a+'</b><br>Zone '+p.z+'<table class="pp"><tr><td>Lot area</td><td>'+n(p.s)+' sq ft</td></tr><tr><td>Frontage</td><td>'+n(p.f)+' ft</td></tr><tr><td>Lots possible today (est.)</td><td>'+p.q+'</td></tr><tr><td>Lots possible at 5,000 sq ft</td><td>'+p.p+'</td></tr><tr><td>New lots unlocked</td><td>'+p.u+'</td></tr></table><div class="fine">Potential only: buildings, wetlands and easements are not considered.</div>')}}).addTo(map);
+function existPopup(p){var h='<b>'+p.a+'</b><br>Zone '+p.z+' (minimum '+n(p.m)+' sq ft)<table class="pp"><tr><td>Lot area</td><td>'+n(p.s)+' sq ft</td></tr><tr><td>Year built</td><td>'+(p.y||'n/a')+'</td></tr><tr><td>Style</td><td>'+(p.t||'n/a')+'</td></tr></table>';
+  return h+(p.b==='u'?'<div class="pn red">Smaller than 5,000 sq ft, so a 5,000 sq ft minimum would not apply to this lot.</div>':'<div class="pn">Smaller than the district minimum by '+n(p.m-p.s)+' sq ft. At 5,000 sq ft this lot would meet the minimum on lot area (frontage not tested).</div>')}
+function mkExist(b,rd,col){return L.geoJSON({type:'FeatureCollection',features:STORY.exist.features.filter(function(f){return f.properties.b===b})},{renderer:rd,style:function(){return {color:'#4a2a0a',weight:.4,fillColor:col,fillOpacity:.92}},onEachFeature:function(f,l){l.bindPopup(existPopup(f.properties))}}).addTo(map)}
+var existB=mkExist('b',rExB,'#f97316'),existU=mkExist('u',rExU,'#991b1b');
+
+function setPane(name,on){var cb=document.getElementById('lg_'+name);if(cb)cb.checked=on;var el=map.getPane(name);if(on){el.style.pointerEvents='';el.style.opacity=1}else{el.style.opacity=0;el.style.pointerEvents='none'}}
+['pZones','pOpp','pExistB','pExistU'].forEach(function(p){setPane(p,false)});
+var curZones=zonesHi;
+function useZones(g){if(g===curZones)return;map.removeLayer(curZones);map.addLayer(g);curZones=g}
+
+var STATE={
+ cover:{view:'city',on:['pZones'],zones:'neutral'},
+ benefits:{view:'city',on:['pZones'],zones:'neutral'},
+ where:{view:'city',on:['pZones'],zones:'hi'},
+ which:{view:'city',on:['pZones','pOpp'],zones:'lo'},
+ explain:{view:'city',on:['pZones','pOpp'],zones:'lo'},
+ everything:{view:'city',on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'},
+ burncoat:{view:'burn',z:16,on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'},
+ end:{view:'city',on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'}
+};
+function go(key){
+  var s=STATE[key];if(!s)return;
+  ['pZones','pOpp','pExistB','pExistU'].forEach(function(p){setPane(p,s.on.indexOf(p)>=0)});
+  if(s.zones)useZones(s.zones==='hi'?zonesHi:(s.zones==='neutral'?zonesNeutral:zonesLo));
+  var opts={animate:!reduce,duration:1.5,easeLinearity:.25};
+  if(s.view==='city')map.flyToBounds(CITY,{animate:!reduce,duration:1.5,padding:[10,10]});
+  else map.flyTo(BURN,s.z,{animate:!reduce,duration:1.5});
+}
+map.fitBounds(CITY);
+
+var steps=[].slice.call(document.querySelectorAll('.step'));
+var current=null;
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var k=e.target.dataset.key;steps.forEach(function(s){s.classList.toggle('active',s===e.target)});if(k!==current){current=k;go(k)}}})},{rootMargin:'-42% 0px -42% 0px',threshold:0});
+steps.forEach(function(s){io.observe(s)});
+steps[0].classList.add('active');go('cover');
+window.addEventListener('scroll',function(){var h=document.documentElement;document.getElementById('progress').style.width=(100*h.scrollTop/(h.scrollHeight-h.clientHeight))+'%'},{passive:true});
+
+['pZones','pOpp','pExistB','pExistU'].forEach(function(nm){document.getElementById('lg_'+nm).addEventListener('change',function(){setPane(nm,this.checked)})});
+var lg=document.getElementById('legend'),lgt=document.getElementById('lgt');
+function lgOpen(o){lg.classList.toggle('closed',!o);lgt.setAttribute('aria-expanded',o);document.getElementById('lgc').innerHTML=o?'&#9662;':'&#9656;'}
+lgt.addEventListener('click',function(){lgOpen(lg.classList.contains('closed'))});
+lgOpen(!mq.matches);
+var ex=document.getElementById('explore');
+function exLabel(on){return mq.matches?(on?'Back to the story':'Explore the map'):(on?'Exit full screen':'Full screen map')}
+function setExplore(on){document.body.classList.toggle('explore',on);ex.textContent=exLabel(on);applyPass();
+  map.scrollWheelZoom[on?'enable':'disable']();
+  if(!mq.matches){var d=document.documentElement;if(on&&d.requestFullscreen)d.requestFullscreen().catch(function(){});else if(!on&&document.fullscreenElement)document.exitFullscreen()}
+  setTimeout(function(){map.invalidateSize()},80)}
+ex.textContent=exLabel(false);
+ex.addEventListener('click',function(){setExplore(!document.body.classList.contains('explore'))});
+document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement&&document.body.classList.contains('explore')&&!mq.matches)setExplore(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('explore'))setExplore(false)});
+mq.addEventListener('change',function(){setExplore(false);lgOpen(!mq.matches);setTimeout(function(){map.invalidateSize();if(current)go(current)},60)});
+window.addEventListener('resize',function(){map.invalidateSize()});
+
+/* ---------- address lookup ---------- */
+var AB={street:'st',avenue:'ave',road:'rd',drive:'dr',court:'ct',lane:'ln',place:'pl',boulevard:'blvd',terrace:'ter',circle:'cir',parkway:'pkwy',east:'e',west:'w',north:'n',south:'s',mount:'mt',mountain:'mtn'};
+function norm(t){return t.toLowerCase().replace(/[.,#]/g,' ').split(/\s+/).filter(Boolean).map(function(w){return AB[w]||w})}
+var IDX=[];
+opp.eachLayer(function(l){var p=l.feature.properties;IDX.push({k:'o',a:p.a,t:norm(p.a),p:p,l:l})});
+[existB,existU].forEach(function(g){g.eachLayer(function(l){var p=l.feature.properties;IDX.push({k:'e',a:p.a,t:norm(p.a),p:p,l:l})})});
+STORY.chk.forEach(function(p){IDX.push({k:'c',a:p.a,t:norm(p.a),p:p})});
+var q=document.getElementById('q'),res=document.getElementById('sres'),ans=document.getElementById('answer');
+function find(v){var qt=norm(v);if(!qt.length)return[];var out=IDX.filter(function(e){return qt.every(function(w,i){var ex=/^\d+$/.test(w)&&i<qt.length-1;return e.t.some(function(x){return ex?x===w:x.indexOf(w)===0})})});
+  out.sort(function(a,b){return a.a.localeCompare(b.a,undefined,{numeric:true})});return out}
+function show(list){res.innerHTML='';ans.hidden=true;var cur=list.slice(0,6);
+  cur.forEach(function(e){var li=document.createElement('li');li.textContent=e.a+' ('+e.p.z+')';li.onmousedown=function(ev){ev.preventDefault();pick(e)};li.ontouchend=function(ev){ev.preventDefault();pick(e)};res.appendChild(li)});
+  res.hidden=!cur.length;
+  if(!cur.length&&q.value.trim()){res.hidden=true;ans.hidden=false;ans.className='none';ans.textContent="We didn't find that address among the lots that could split or the lots below their district's minimum. It may meet the minimum already, be in another district, or be a different kind of property."}}
+function pick(e){res.hidden=true;q.value=e.a;q.blur();ans.hidden=false;var p=e.p;
+  if(e.k==='c'){ans.className='none';ans.textContent=p.a+": the source data for this lot has a potential data issue, so we haven't counted it."}
+  else if(e.k==='o'){ans.className='';ans.innerHTML='<b>'+p.a+'</b> is '+n(p.s)+' sq ft in '+p.z+'. By area and frontage it could hold up to <b>'+p.p+' lots</b> under a 5,000 sq ft minimum (today: '+p.q+'). Potential only: we did not check where the house sits, wetlands or other limits.'}
+  else if(p.b==='u'){ans.className='red';ans.innerHTML='<b>'+p.a+'</b> is '+n(p.s)+' sq ft, under 5,000. A 5,000 sq ft minimum would not apply to this lot.'}
+  else{ans.className='warm';ans.innerHTML='<b>'+p.a+'</b> is '+n(p.s)+' sq ft. The minimum in '+p.z+' is '+n(p.m)+', so your lot is '+n(p.m-p.s)+' sq ft below it. A 5,000 sq ft minimum would meet the lot-size rule.'}
+  if(e.l){var b=e.l.getBounds();map.flyToBounds(b,{maxZoom:18,padding:[60,60],animate:!reduce,duration:1.2});setTimeout(function(){e.l.openPopup(b.getCenter())},1300)}}
+q.addEventListener('input',function(){show(find(q.value))});
+q.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();var l=find(q.value);if(l.length)pick(l[0])}});
+q.addEventListener('focus',function(){go('burncoat')});
+})();
+</script>
+</body>
+</html>
