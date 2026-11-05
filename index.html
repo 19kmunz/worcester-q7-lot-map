@@ -59,10 +59,19 @@ ul.benefits b{display:block}
 .btn.alt{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}
 a{color:var(--accent)}
 .gap{display:none}
-#legend{position:fixed;left:calc(40% + 14px);bottom:16px;z-index:1500;background:rgba(255,255,255,.95);border-radius:10px;font-size:.84rem;box-shadow:0 2px 12px rgba(0,0,0,.2);width:300px;max-width:calc(60% - 28px)}
-#legend .lh{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;padding:9px 12px;font:600 .9rem system-ui,sans-serif;cursor:pointer;text-align:left}
-#legend .lb{padding:0 12px 10px;max-height:46vh;overflow:auto}
+#maptop{position:fixed;top:14px;left:calc(40% + 14px);right:64px;z-index:2500;display:flex;gap:8px;align-items:flex-start;pointer-events:none}
+#maptop>*{pointer-events:auto}
+body.explore #maptop{left:14px}
+#legend{position:relative;flex:0 0 auto;font-size:.84rem}
+#legend .lh{display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border:0;border-radius:8px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.2);font:600 .9rem system-ui,sans-serif;color:var(--ink);cursor:pointer;white-space:nowrap}
+#legend .lb{position:absolute;top:calc(100% + 6px);left:0;width:310px;max-width:calc(100vw - 28px);padding:8px 12px 10px;max-height:calc(100vh - 140px);overflow:auto;background:rgba(255,255,255,.97);border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,.22)}
 #legend.closed .lb{display:none}
+#msearch{position:relative;flex:1 1 auto;min-width:0;max-width:380px}
+#msearch input{width:100%;height:42px;padding:0 12px 0 38px;border:0;border-radius:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px center;box-shadow:0 2px 12px rgba(0,0,0,.2);font:.9rem system-ui,sans-serif;color:var(--ink)}
+#msearch input::placeholder{color:#777}
+#msearch input:focus{outline:2px solid var(--accent);outline-offset:0}
+#mres{position:absolute;top:48px;left:0;right:0;margin:0;padding:0;list-style:none;background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.22);overflow:hidden}
+#mmsg{position:absolute;top:48px;left:0;right:0;padding:9px 12px;background:#fff;border-radius:8px;font-size:.86rem;color:#444;box-shadow:0 2px 12px rgba(0,0,0,.22)}
 #legend label{display:flex;align-items:flex-start;gap:8px;margin:7px 0;cursor:pointer;line-height:1.3}
 #legend input{margin-top:2px;flex:0 0 auto}
 #legend .sub{display:flex;flex-wrap:wrap;gap:4px 12px;margin:2px 0 0;font-size:.78rem;color:var(--muted)}
@@ -73,26 +82,20 @@ a{color:var(--accent)}
 .pn{margin-top:6px;padding:6px 8px;border-radius:6px;background:#fff1e3;border-left:3px solid #E17C05;font-size:.85rem}
 .pn.red{background:#fde8e8;border-color:#991b1b}
 .srcs{margin:8px 0 0;padding-left:18px;font-size:.84rem;color:var(--muted)}.srcs li{margin:3px 0}
-#msearch{display:none;position:fixed;top:14px;left:14px;z-index:2500;width:min(340px,calc(100% - 100px))}
-body.explore #msearch{display:block}
-body.explore #legend{top:64px;bottom:auto}
-#msearch input{width:100%;padding:11px 12px;border:1.5px solid #bbb;border-radius:8px;font:inherit;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.2)}
-#mres{margin:4px 0 0;padding:0;list-style:none;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);overflow:hidden}
 #mres li{padding:9px 12px;border-bottom:1px solid #eee;cursor:pointer;font-size:.92rem}
 #mres li:hover{background:#eef4fa}
-#mmsg{margin-top:4px;padding:9px 12px;background:#fff;border-radius:8px;font-size:.88rem;color:#444;box-shadow:0 2px 10px rgba(0,0,0,.2)}
 #explore{display:block;position:fixed;right:14px;bottom:16px;z-index:3000;padding:10px 16px;border-radius:999px;border:0;background:var(--accent);color:#fff;font:600 14px system-ui,sans-serif;box-shadow:0 3px 14px rgba(0,0,0,.3);cursor:pointer}
 body.explore{overflow:hidden}
 body.explore #map{left:0}
 body.explore .story{opacity:0;pointer-events:none}
 body.explore .story *{pointer-events:none!important}
-body.explore #legend{left:14px}
 .leaflet-tooltip{font:14px/1.35 system-ui,sans-serif}
 /* ---------- phone / narrow ---------- */
 @media (max-width:899px){
   body{font-size:16px}
   #map{left:0}
   #map.pass{pointer-events:none}
+  #map.pass .leaflet-popup{pointer-events:auto}
   body.explore #map{pointer-events:auto}
   .story{width:100%;transition:opacity .3s}
   .step{min-height:0;display:block;padding:0 14px}
@@ -101,10 +104,10 @@ body.explore #legend{left:14px}
   .gap.first{height:30vh}
   h1{font-size:1.85rem}h2{font-size:1.4rem}
   .big{font-size:3.6rem}.big.blue{font-size:3rem}
-  #legend{left:10px;right:auto;top:10px;bottom:auto;width:auto;max-width:78%;font-size:.78rem}
-  #legend .lh{padding:7px 10px}
-  body.explore #legend{left:10px;top:64px}
-  #msearch{width:calc(100% - 28px)}
+  #maptop{left:10px;top:10px;right:56px;gap:6px}
+  body.explore #maptop{left:10px}
+  #legend .lb{width:calc(100vw - 20px);max-height:calc(100vh - 120px)}
+  #legend .lh{padding:0 11px}
   #explore{right:12px;bottom:14px;padding:11px 16px;font-size:15px}
   
 }
@@ -113,21 +116,24 @@ body.explore #legend{left:14px}
 <body>
 <div id="progress"></div>
 <div id="map"></div>
+<div id="maptop">
 <div id="legend">
   <button class="lh" id="lgt" type="button" aria-expanded="true" aria-controls="lgb"><span>Map layers</span><span id="lgc">&#9662;</span></button>
   <div class="lb" id="lgb">
     <label><input type="checkbox" id="lg_pZones" checked><span>Zoning districts<span class="sub"><span><span class="sw" style="background:#c2570c"></span>RS-10 (10,000 sq ft)</span><span><span class="sw" style="background:#e6ab02"></span>RS-7, RL-7 (7,000 sq ft)</span></span></span></label>
     <label><input type="checkbox" id="lg_pOpp" checked><span>Lots that could split<span class="sub"><span><span class="sw" style="background:#bdd7e7"></span><span class="sw" style="background:#6baed6"></span><span class="sw" style="background:#2171b5"></span><span class="sw" style="background:#08306b"></span>darker = more additional lots unlocked</span></span></span></label>
+    
+    <label><input type="checkbox" id="lg_pExistB" checked><span><span class="sw" style="background:#f97316"></span> Homes below the district minimum</span></label>
+    <label><input type="checkbox" id="lg_pExistU" checked><span><span class="sw" style="background:#991b1b"></span> Homes under 5,000 sq ft<span class="sub">A 5,000 sq ft minimum would not reach these</span></span></label>
     <details id="extra"><summary>Extra data</summary>
       <label><input type="checkbox" id="lg_pUnch"><span><span class="sw" style="background:rgba(120,140,170,.18);border:1.5px dashed #6f87a6"></span> Unchanged lots<span class="sub">Today&rsquo;s rules already allow the same number of lots as 5,000 sq ft would, so this change would not affect them.</span></span></label>
       <label><input type="checkbox" id="lg_pErr"><span><span class="sw" style="background:rgba(130,130,130,.2);border:1.5px dashed #777"></span> Potential data issues<span class="sub">Lots where the Question 7 data does not match the assessor record. Not counted in any total.</span></span></label>
     </details>
-    <label><input type="checkbox" id="lg_pExistB" checked><span><span class="sw" style="background:#f97316"></span> Homes below the district minimum</span></label>
-    <label><input type="checkbox" id="lg_pExistU" checked><span><span class="sw" style="background:#991b1b"></span> Homes under 5,000 sq ft<span class="sub">A 5,000 sq ft minimum would not reach these</span></span></label>
     <p class="note">The story turns layers on as you scroll. Use the boxes to change them. Click a lot for details.</p>
   </div>
 </div>
 <div id="msearch"><input id="mq" type="search" placeholder="Search an address, e.g. 102 Clark St" aria-label="Search the map by address" autocomplete="off"><ul id="mres" hidden></ul><div id="mmsg" hidden></div></div>
+</div>
 <button id="explore" type="button">Full screen map</button>
 
 <main class="story" id="story">
@@ -280,6 +286,7 @@ var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var mq=window.matchMedia('(max-width: 899px)');
 var CITY=[[42.2100,-71.8840],[42.3412,-71.7312]];
 var BURN=[42.3090,-71.7910];
+L.Popup.mergeOptions({autoPanPaddingTopLeft:[12,70],autoPanPaddingBottomRight:[12,12]});
 var map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:0.25,scrollWheelZoom:false,doubleClickZoom:true});
 L.control.zoom({position:'topright'}).addTo(map);
 map.attributionControl.setPrefix(false);
@@ -390,7 +397,7 @@ function mshow(list){mres.innerHTML='';mmsg.hidden=true;var cur=list.slice(0,7);
   cur.forEach(function(e){var li=document.createElement('li');li.textContent=e.a+' ('+e.p.z+')'+(e.k==='c'?' - potential data issue':(e.k==='n'?' - unchanged':''));li.onmousedown=function(ev){ev.preventDefault();mpick(e)};li.ontouchend=function(ev){ev.preventDefault();mpick(e)};mres.appendChild(li)});
   mres.hidden=!cur.length;
   if(!cur.length&&mq2.value.trim()){mmsg.hidden=false;mmsg.textContent="No match among the lots on this map. It may meet its district's minimum already, be in another district, or be another kind of property."}}
-function mpick(e){mres.hidden=true;mmsg.hidden=true;mq2.value=e.a;mq2.blur();setPane(e.pane,true);if(e.pane==='pUnch'||e.pane==='pErr')document.getElementById('extra').open=true;var b=e.l.getBounds();map.flyToBounds(b,{maxZoom:18,padding:[80,80],animate:!reduce,duration:1.2});setTimeout(function(){e.l.openPopup(b.getCenter())},1300)}
+function mpick(e){mres.hidden=true;mmsg.hidden=true;mq2.value=e.a;mq2.blur();if(mq.matches&&!document.body.classList.contains('explore'))setExplore(true);setPane(e.pane,true);if(e.pane==='pUnch'||e.pane==='pErr')document.getElementById('extra').open=true;var b=e.l.getBounds();map.flyToBounds(b,{maxZoom:18,padding:[80,80],animate:!reduce,duration:1.2});setTimeout(function(){e.l.openPopup(b.getCenter())},1300)}
 mq2.addEventListener('input',function(){mshow(find(mq2.value))});
 mq2.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();var l=find(mq2.value);if(l.length)mpick(l[0])}});
 q.addEventListener('input',function(){show(find(q.value))});
