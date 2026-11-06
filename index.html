@@ -27,8 +27,8 @@ h1{font-size:2.35rem}h2{font-size:1.65rem}
 p{margin:0 0 12px}
 .big{font:800 4.6rem/1 system-ui,sans-serif;color:var(--yes);margin:4px 0 2px;letter-spacing:-.02em}
 .big.blue{color:var(--blue);font-size:3.6rem}
-.cap{color:var(--muted);font-size:.95rem}
-.ask{font-family:Georgia,serif;font-size:1.25rem;line-height:1.3;border-left:4px solid var(--accent);padding-left:12px;margin:14px 0 0}
+.big.orange{color:#ea580c;font-size:3.6rem}
+.cap{margin:0 0 12px}
 .hint{margin-top:16px;color:var(--muted);font-size:.9rem}
 ul.benefits{list-style:none;padding:0;margin:8px 0 0}
 ul.benefits li{display:flex;gap:12px;margin:0 0 14px}
@@ -106,7 +106,7 @@ body.explore .story *{pointer-events:none!important}
   .gap{display:block;height:58vh}
   .gap.first{height:30vh}
   h1{font-size:1.85rem}h2{font-size:1.4rem}
-  .big{font-size:3.6rem}.big.blue{font-size:3rem}
+  .big{font-size:3.6rem}.big.blue,.big.orange{font-size:3rem}
   #maptop{left:10px;top:10px;right:56px;gap:6px}
   body.explore #maptop{left:10px}
   #legend .lb{width:calc(100vw - 20px);max-height:calc(100vh - 120px)}
@@ -156,7 +156,7 @@ body.explore .story *{pointer-events:none!important}
       <div class="big">59.1%</div>
       <p class="cap">of Worcester voters backed Question 7: 26,691 yes to 18,448 no.</p>
       <p>Question 7 asked whether a single-family home could be built on a lot as small as 5,000 square feet with 50 feet of frontage (i.e. road access). Statewide, it looks like it will fall short.</p>
-      <p class="ask">If Worcester voted in favor, why not pass it ourselves?</p>
+      <p><b>If Worcester voted in favor, why not pass it ourselves?</b></p>
       <p class="hint">Scroll to see what this would change &darr;</p>
     </div>
   </section>
@@ -192,7 +192,8 @@ body.explore .story *{pointer-events:none!important}
     <div class="card">
       <p class="kicker">Existing Conditions</p>
       <h2>Our Neighborhoods Already Have Small Lots</h2>
-      <p>Across these districts, <b>3,937 homes</b> already stand on lots smaller than today&rsquo;s minimum, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#f97316"></span>orange</span>. Another 677 are under 5,000 sq ft, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#991b1b"></span>dark red</span>, which this change would not reach.</p>
+      <div class="big orange">3,937</div>
+      <p class="cap">existing homes already stand on lots smaller than today&rsquo;s minimum, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#f97316"></span>orange</span>. Another <b>677</b> are under 5,000 sq ft, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#991b1b"></span>dark red</span>, which this change would not reach.</p>
       <p>Most of these homes were built decades ago, long before today&rsquo;s lot-size rules. When zoning changed, they ended up out of compliance. They&rsquo;re allowed to stay (&ldquo;grandfathered&rdquo;), but that can make life harder for the people who live in them: repairs, renovations and rebuilding the home they already live in can mean a long review.</p>
       <p>Next: which of the <i>bigger</i> lots could split.</p>
     </div>
