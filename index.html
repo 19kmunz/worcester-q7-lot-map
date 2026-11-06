@@ -336,6 +336,44 @@ function existPopup(p){var h='<b>'+p.a+'</b><br>Zone '+p.z+' (minimum '+n(p.m)+'
 function mkExist(b,rd,col){return L.geoJSON({type:'FeatureCollection',features:STORY.exist.features.filter(function(f){return f.properties.b===b})},{renderer:rd,style:function(){return {color:'#4a2a0a',weight:.4,fillColor:col,fillOpacity:.92}},onEachFeature:function(f,l){l.bindPopup(existPopup(f.properties))}}).addTo(map)}
 var existB=mkExist('b',rExB,'#f97316'),existU=mkExist('u',rExU,'#991b1b');
 
+/* ---------- dots when lots are too small to draw as shapes ---------- */
+var DOTS=/[?&]dots=1/.test(location.search);
+var MIN_PX=2;
+function centroidOf(g){var ring=g.type==='MultiPolygon'?g.coordinates[0][0]:g.coordinates[0],a=0,cx=0,cy=0,i,x0,y0,x1,y1,f;
+  for(i=0;i<ring.length-1;i++){x0=ring[i][0];y0=ring[i][1];x1=ring[i+1][0];y1=ring[i+1][1];f=x0*y1-x1*y0;a+=f;cx+=(x0+x1)*f;cy+=(y0+y1)*f}
+  if(Math.abs(a)<1e-14){return [ring[0][1],ring[0][0]]}return [cy/(3*a),cx/(3*a)]}
+function narrowWidth(g){var polys=g.type==='MultiPolygon'?g.coordinates:[g.coordinates],kx=111320*Math.cos(42.27*Math.PI/180),ky=110574,pts=[],i,j,k;
+  polys.forEach(function(pl){pl[0].forEach(function(c){pts.push([c[0]*kx,c[1]*ky])})});
+  pts.sort(function(a,b){return a[0]-b[0]||a[1]-b[1]});
+  function cr(o,a,b){return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0])}
+  var lo=[],up=[];for(i=0;i<pts.length;i++){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],pts[i])<=0)lo.pop();lo.push(pts[i])}
+  for(i=pts.length-1;i>=0;i--){while(up.length>=2&&cr(up[up.length-2],up[up.length-1],pts[i])<=0)up.pop();up.push(pts[i])}
+  var hull=lo.slice(0,-1).concat(up.slice(0,-1)),best=Infinity,n=hull.length;
+  for(i=0;i<n;i++){var a=hull[i],b=hull[(i+1)%n],dx=b[0]-a[0],dy=b[1]-a[1],L=Math.sqrt(dx*dx+dy*dy);if(!L)continue;var mn=Infinity,mx=-Infinity;
+    for(j=0;j<n;j++){k=(hull[j][0]-a[0])*(-dy/L)+(hull[j][1]-a[1])*(dx/L);if(k<mn)mn=k;if(k>mx)mx=k}
+    if(mx-mn<best)best=mx-mn}
+  return isFinite(best)?best:5}
+function dotRadius(extra){var z=map.getZoom();return Math.max(1.5,Math.min(3,.6+(z-10)*.5))+(extra||0)}
+var dotSets=[];
+function mkDots(polyLayer,rd,fillFn,opts){var grp=L.layerGroup(),items=[];
+  polyLayer.eachLayer(function(l){var p=l.feature.properties,fc=fillFn(p),st=polyLayer.options.style(l.feature),m=L.circleMarker(centroidOf(l.feature.geometry),{renderer:rd,radius:2.5,stroke:true,color:st.color,weight:st.weight,opacity:1,dashArray:st.dashArray,fillColor:fc.c,fillOpacity:opts.op||st.fillOpacity});
+    if(l.getPopup())m.bindPopup(l.getPopup().getContent());grp.addLayer(m);items.push({l:l,m:m,x:fc.x||0,side:narrowWidth(l.feature.geometry),shape:null})});
+  grp.addTo(map);dotSets.push({poly:polyLayer,grp:grp,items:items});return grp}
+var ramp2=['#9ecae1','#4292c6','#2171b5','#08306b'];
+if(DOTS){
+mkDots(opp,rOpp,function(p){var k=Math.max(1,Math.min(4,p.u||1));return {c:ramp2[k-1],x:(k-1)*.4}},{});
+mkDots(existB,rExB,function(){return {c:'#f97316'}},{});
+mkDots(existU,rExU,function(){return {c:'#991b1b'}},{});
+mkDots(unch,rUn,function(){return {c:'#6f87a6'}},{op:.45});
+mkDots(errL,rErr,function(){return {c:'#777'}},{op:.45});
+}
+var dotsReady=false;
+function syncDots(){if(!dotsReady)return;var z=map.getZoom(),mpp=156543.03*Math.cos(42.27*Math.PI/180)/Math.pow(2,z),r=dotRadius();
+  dotSets.forEach(function(s){s.items.forEach(function(it){var shape=it.side/mpp>=MIN_PX;
+    if(shape!==it.shape){it.shape=shape;if(shape){s.grp.removeLayer(it.m);s.poly.addLayer(it.l)}else{s.poly.removeLayer(it.l);s.grp.addLayer(it.m)}}
+    if(!shape)it.m.setRadius(r+it.x)})})}
+if(DOTS)map.on('zoomend',syncDots);
+
 function setPane(name,on){var cb=document.getElementById('lg_'+name);if(cb)cb.checked=on;var el=map.getPane(name);el.classList.toggle('on',on);if(on){el.style.pointerEvents='';el.style.opacity=1}else{el.style.opacity=0;el.style.pointerEvents='none'}}
 ['pZones','pOpp','pExistB','pExistU','pUnch','pErr','pVoteY','pVoteN'].forEach(function(p){setPane(p,false)});
 var curZones=zonesHi;
@@ -378,7 +416,7 @@ map.fitBounds(CITY);
 map.on('movestart',function(){if(!flying)setManual(true)});
 document.getElementById('recenter').addEventListener('click',function(){setManual(false);if(current)go(current,true)});
 
-if(DEBUG){map.on('movestart',function(){dbg('movestart flying='+flying+' manual='+manual)});map.on('moveend',function(){var c=map.getCenter();dbg('moveend z='+map.getZoom().toFixed(2)+' '+c.lat.toFixed(4)+','+c.lng.toFixed(4))});setInterval(function(){var el=document.getElementById('dbgstat');if(!el){el=document.createElement('div');el.id='dbgstat';el.style.cssText='position:fixed;left:6px;top:36px;z-index:9999;background:#000c;color:#ff9;font:10px ui-monospace,Menlo,monospace;padding:2px 6px;border-radius:4px;pointer-events:none';document.body.appendChild(el)}el.textContent='step='+current+' manual='+manual+' z='+map.getZoom().toFixed(1)},700)}
+if(DEBUG){window.__map=map;map.on('movestart',function(){dbg('movestart flying='+flying+' manual='+manual)});map.on('moveend',function(){var c=map.getCenter();dbg('moveend z='+map.getZoom().toFixed(2)+' '+c.lat.toFixed(4)+','+c.lng.toFixed(4))});setInterval(function(){var el=document.getElementById('dbgstat');if(!el){el=document.createElement('div');el.id='dbgstat';el.style.cssText='position:fixed;left:6px;top:36px;z-index:9999;background:#000c;color:#ff9;font:10px ui-monospace,Menlo,monospace;padding:2px 6px;border-radius:4px;pointer-events:none';document.body.appendChild(el)}el.textContent='step='+current+' manual='+manual+' z='+map.getZoom().toFixed(1)},700)}
 var steps=[].slice.call(document.querySelectorAll('.step'));
 var current=null;
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var k=e.target.dataset.key;steps.forEach(function(s){s.classList.toggle('active',s===e.target)});if(k!==current){current=k;go(k)}}})},{rootMargin:'-42% 0px -42% 0px',threshold:0});
@@ -444,6 +482,7 @@ mq2.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefau
 q.addEventListener('input',function(){show(find(q.value))});
 q.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();var l=find(q.value);if(l.length)pick(l[0])}});
 q.addEventListener('focus',function(){if(!manual)go('burncoat')});
+if(DOTS){dotsReady=true;syncDots()}
 })();
 </script>
 </body>
