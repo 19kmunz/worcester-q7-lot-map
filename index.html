@@ -89,6 +89,9 @@ body.explore #maptop{left:14px}
 #mres li:hover{background:#eef4fa}
 #recenter{position:fixed;left:calc(40% + 14px);bottom:16px;z-index:2400;padding:9px 14px;border:0;border-radius:999px;background:#fff;color:var(--accent);font:600 14px system-ui,sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.25);cursor:pointer}
 #recenter[hidden]{display:none}
+#explore.blink{animation:exring .55s ease-out 2}
+@keyframes exring{0%{box-shadow:0 0 0 0 rgba(163,65,0,.7),0 3px 14px rgba(0,0,0,.3)}100%{box-shadow:0 0 0 16px rgba(163,65,0,0),0 3px 14px rgba(0,0,0,.3)}}
+@media (prefers-reduced-motion:reduce){#explore.blink{animation:none;outline:4px solid #fff;outline-offset:2px}}
 #explore{display:block;position:fixed;right:14px;bottom:16px;z-index:3000;padding:10px 16px;border-radius:999px;border:0;background:var(--accent);color:#fff;font:600 14px system-ui,sans-serif;box-shadow:0 3px 14px rgba(0,0,0,.3);cursor:pointer}
 body.explore{overflow:hidden}
 body.explore #map{left:0}
@@ -98,6 +101,7 @@ body.explore .story *{pointer-events:none!important}
 /* ---------- phone / narrow ---------- */
 @media (max-width:899px){
   body{font-size:16px}
+  #msearch input,.find input{font-size:16px}
   #map{left:0}
   #map.pass{pointer-events:none}
   #map.pass .leaflet-popup{pointer-events:auto}
@@ -301,7 +305,8 @@ var map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:0.25,scr
 L.control.zoom({position:'topright'}).addTo(map);
 map.attributionControl.setPrefix(false);
 map.getContainer().addEventListener('wheel',function(e){if(map.scrollWheelZoom.enabled()||!(e.ctrlKey||e.metaKey))return;e.preventDefault();var d=-e.deltaY*(e.deltaMode===1?0.05:0.01);map.setZoomAround(map.mouseEventToContainerPoint(e),Math.max(map.getMinZoom(),Math.min(18,map.getZoom()+d)),{animate:false})},{passive:false});
-function applyPass(){document.getElementById('map').classList.toggle('pass',mq.matches&&!document.body.classList.contains('explore'))}
+function applyPass(){var locked=mq.matches&&!document.body.classList.contains('explore');document.getElementById('map').classList.toggle('pass',locked);
+  ['dragging','touchZoom','doubleClickZoom','boxZoom','tap'].forEach(function(k){if(map[k])map[k][locked?'disable':'enable']()})}
 applyPass();
 L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,opacity:.42,attribution:'Basemap: USGS The National Map'}).addTo(map);
 
@@ -388,11 +393,18 @@ lgt.addEventListener('click',function(){lgOpen(lg.classList.contains('closed'))}
 lgOpen(!mq.matches);
 var ex=document.getElementById('explore');
 function exLabel(on){return mq.matches?(on?'Back to the story':'Explore the map'):(on?'Exit full screen':'Full screen map')}
-function setExplore(on){document.body.classList.toggle('explore',on);document.getElementById('recenter').hidden=on||!manual;ex.textContent=exLabel(on);applyPass();
+function clearBubbles(){map.closePopup();map.eachLayer(function(l){if(l.closeTooltip)l.closeTooltip()})}
+function setExplore(on){if(!on)clearBubbles();document.body.classList.toggle('explore',on);document.getElementById('recenter').hidden=on||!manual;ex.textContent=exLabel(on);applyPass();
   map.scrollWheelZoom[on?'enable':'disable']();
   if(!mq.matches){var d=document.documentElement;if(on&&d.requestFullscreen)d.requestFullscreen().catch(function(){});else if(!on&&document.fullscreenElement)document.exitFullscreen()}
   setTimeout(function(){map.invalidateSize()},80)}
 ex.textContent=exLabel(false);
+(function(){var t0=0,x0=0,y0=0,live=false,blinkT=null;
+ function inUI(el){return !!(el&&el.closest&&el.closest('.card,#maptop,#explore,#recenter,.leaflet-control,.leaflet-popup,#legend'))}
+ document.addEventListener('pointerdown',function(e){live=mq.matches&&!document.body.classList.contains('explore')&&!inUI(e.target);t0=Date.now();x0=e.clientX;y0=e.clientY},{passive:true});
+ document.addEventListener('pointerup',function(e){if(!live)return;live=false;if(Date.now()-t0>450||Math.abs(e.clientX-x0)>10||Math.abs(e.clientY-y0)>10)return;
+  ex.classList.remove('blink');void ex.offsetWidth;ex.classList.add('blink');clearTimeout(blinkT);blinkT=setTimeout(function(){ex.classList.remove('blink')},1300)},{passive:true});
+ document.addEventListener('pointercancel',function(){live=false},{passive:true})})();
 ex.addEventListener('click',function(){setExplore(!document.body.classList.contains('explore'))});
 document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement&&document.body.classList.contains('explore')&&!mq.matches)setExplore(false)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('explore'))setExplore(false)});
