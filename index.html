@@ -158,7 +158,7 @@ body.explore .story *{pointer-events:none!important}
   <section class="step" data-key="benefits">
     <div class="card">
       <p class="kicker">Why it makes sense</p>
-      <h2>A small change with three big upsides</h2>
+      <h2>Potential benefits:</h2>
       <ul class="benefits">
         <li><span class="dot">1</span><span><b>Gentle growth</b>One more home at a time, on streets that already exist. Yard and setback rules stay exactly as they are, so neighborhoods keep their space.</span></li>
         <li><span class="dot">2</span><span><b>Flexibility for homeowners</b>It&rsquo;s an option that allows people to build what they want where they already are. This means the neighborhood is more flexible to react to changes it needs.</span></li>
@@ -198,7 +198,7 @@ body.explore .story *{pointer-events:none!important}
       <h2>So what would be big enough to split?</h2>
       <div class="big blue">3,991</div>
       <p class="cap">potential new lots, on 3,773 lots that could gain at least one more.</p>
-      <p>These are the lots with enough area and street frontage to make more lots than today&rsquo;s rules allow. The darker the blue, the more lots it could become. Lots that wouldn&rsquo;t change are hidden; turn them on in the legend.</p>
+      <p>These are the lots with enough area and street frontage to make more lots than today&rsquo;s rules allow. The darker the blue, the more lots it could become. Lots that can be subdivided but don&rsquo;t gain additional lot potential are hidden; turn them on in the legend.</p>
       <div class="ramp"><span style="background:#bdd7e7"></span><span style="background:#6baed6"></span><span style="background:#2171b5"></span><span style="background:#08306b"></span></div>
       <div class="ramplab"><span>+1 lot</span><span>2</span><span>3</span><span>4 or more</span></div>
       <p class="fine" style="margin-top:8px">Potential only. Counts are what the rule would allow, not what will be built.</p>
@@ -279,6 +279,9 @@ body.explore .story *{pointer-events:none!important}
 <script src="data/story-data.js"></script>
 <script>
 (function(){
+var DEBUG=/[?&]debug=1/.test(location.search),dbgEl=null,dbgLines=[];
+function dbg(m){if(!DEBUG)return;try{dbgLines.push(((performance.now()/1000)|0)+'s '+m);if(dbgLines.length>14)dbgLines.shift();if(!dbgEl){dbgEl=document.createElement('pre');dbgEl.style.cssText='position:fixed;left:6px;right:6px;top:60px;z-index:9999;margin:0;padding:6px 8px;background:rgba(0,0,0,.82);color:#9f9;font:10px/1.35 ui-monospace,Menlo,monospace;max-height:42vh;overflow:hidden;pointer-events:none;white-space:pre-wrap;border-radius:6px';document.body.appendChild(dbgEl)}dbgEl.textContent=dbgLines.join('\n')}catch(e){}}
+if(DEBUG){window.addEventListener('error',function(e){dbg('ERROR '+e.message+' @'+(e.lineno||'?'))});window.addEventListener('unhandledrejection',function(e){dbg('REJECT '+(e.reason&&e.reason.message||e.reason))});dbg('UA '+navigator.userAgent.replace(/\(.*?\)/,function(m){return m.slice(0,40)}));dbg('IO='+('IntersectionObserver' in window)+' size='+innerWidth+'x'+innerHeight+' dpr='+devicePixelRatio)}
 var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var mq=window.matchMedia('(max-width: 899px)');
 var CITY=[[42.2100,-71.8840],[42.3412,-71.7312]];
@@ -340,6 +343,7 @@ function viewFor(s){flying=true;clearTimeout(flyTimer);flyTimer=setTimeout(funct
 function setManual(m){manual=m;document.getElementById('recenter').hidden=!m||document.body.classList.contains('explore')}
 function go(key,force){
   var s=STATE[key];if(!s)return;
+  dbg('go '+key+' view='+s.view+' manual='+manual+' force='+!!force);
   ['pZones','pOpp','pExistB','pExistU'].forEach(function(p){setPane(p,s.on.indexOf(p)>=0)});
   if(s.zones)useZones(s.zones==='hi'?zonesHi:(s.zones==='neutral'?zonesNeutral:zonesLo));
   if(manual&&!force)return;
@@ -349,6 +353,7 @@ map.fitBounds(CITY);
 map.on('movestart',function(){if(!flying)setManual(true)});
 document.getElementById('recenter').addEventListener('click',function(){setManual(false);if(current)go(current,true)});
 
+if(DEBUG){map.on('movestart',function(){dbg('movestart flying='+flying+' manual='+manual)});map.on('moveend',function(){var c=map.getCenter();dbg('moveend z='+map.getZoom().toFixed(2)+' '+c.lat.toFixed(4)+','+c.lng.toFixed(4))});setInterval(function(){var el=document.getElementById('dbgstat');if(!el){el=document.createElement('div');el.id='dbgstat';el.style.cssText='position:fixed;left:6px;top:36px;z-index:9999;background:#000c;color:#ff9;font:10px ui-monospace,Menlo,monospace;padding:2px 6px;border-radius:4px;pointer-events:none';document.body.appendChild(el)}el.textContent='step='+current+' manual='+manual+' z='+map.getZoom().toFixed(1)},700)}
 var steps=[].slice.call(document.querySelectorAll('.step'));
 var current=null;
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var k=e.target.dataset.key;steps.forEach(function(s){s.classList.toggle('active',s===e.target)});if(k!==current){current=k;go(k)}}})},{rootMargin:'-42% 0px -42% 0px',threshold:0});
@@ -371,7 +376,7 @@ ex.textContent=exLabel(false);
 ex.addEventListener('click',function(){setExplore(!document.body.classList.contains('explore'))});
 document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement&&document.body.classList.contains('explore')&&!mq.matches)setExplore(false)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('explore'))setExplore(false)});
-mq.addEventListener('change',function(){setExplore(false);lgOpen(!mq.matches);setTimeout(function(){map.invalidateSize();if(current)go(current)},60)});
+(mq.addEventListener?function(f){mq.addEventListener('change',f)}:function(f){mq.addListener(f)})(function(){setExplore(false);lgOpen(!mq.matches);setTimeout(function(){map.invalidateSize();if(current)go(current)},60)});
 window.addEventListener('resize',function(){map.invalidateSize()});
 
 /* ---------- address lookup ---------- */
