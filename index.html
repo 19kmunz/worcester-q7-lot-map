@@ -14,7 +14,8 @@ body{margin:0;font:17px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 #map{position:fixed;top:0;bottom:0;right:0;left:40%;background:#f4f1ea;z-index:1}
 .leaflet-container{background:#f4f1ea;font:inherit}
-.leaflet-pane.fade{transition:opacity .7s ease}
+.leaflet-pane.fade{visibility:hidden;transition:opacity .7s ease,visibility 0s linear .7s}
+.leaflet-pane.fade.on{visibility:visible;transition:opacity .7s ease,visibility 0s}
 #progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:2000}
 .story{position:relative;z-index:1000;width:40%;pointer-events:none}
 .step{min-height:100vh;display:flex;align-items:center;padding:6vh 28px}
@@ -128,8 +129,13 @@ body.explore .story *{pointer-events:none!important}
     
     <label><input type="checkbox" id="lg_pExistB" checked><span><span class="sw" style="background:#f97316"></span> Homes below the district minimum</span></label>
     <label><input type="checkbox" id="lg_pExistU" checked><span><span class="sw" style="background:#991b1b"></span> Homes under 5,000 sq ft<span class="sub">A 5,000 sq ft minimum would not reach these</span></span></label>
+    <details id="votebox" hidden open><summary>Question 7 vote by precinct</summary>
+      <label><input type="checkbox" id="lg_pVoteY"><span><span class="sw" style="background:#2e9e5b"></span> Precincts that voted Yes<span class="sub">Fill deepens with the margin. Hover or tap for counts.</span></span></label>
+      <label><input type="checkbox" id="lg_pVoteN"><span><span class="sw" style="background:#7b3fa0"></span> Precincts that voted No</span></label>
+      <p class="note">Unofficial results, Nov. 3, 2026. Shown only with the voting option on.</p>
+    </details>
     <details id="extra"><summary>Extra data</summary>
-      <label><input type="checkbox" id="lg_pUnch"><span><span class="sw" style="background:rgba(120,140,170,.18);border:1.5px dashed #6f87a6"></span> Unchanged lots<span class="sub">Today&rsquo;s rules already allow the same number of lots as 5,000 sq ft would, so this change would not affect them.</span></span></label>
+      <label><input type="checkbox" id="lg_pUnch"><span><span class="sw" style="background:rgba(120,140,170,.18);border:1.5px dashed #6f87a6"></span> Unchanged splittable lots<span class="sub">Today&rsquo;s rules already allow the same number of lots as 5,000 sq ft would, so this change would not affect them.</span></span></label>
       <label><input type="checkbox" id="lg_pErr"><span><span class="sw" style="background:rgba(130,130,130,.2);border:1.5px dashed #777"></span> Potential data issues<span class="sub">Lots where the Community Scale Question 7 data does not match the assessor record. Not counted in any total.</span></span></label>
     </details>
     <p class="note">The story turns layers on as you scroll. Use the boxes to change them. Click a lot for details. Zoom with the + and - buttons, a double-click, or Ctrl/&#8984; and scroll.</p>
@@ -158,11 +164,11 @@ body.explore .story *{pointer-events:none!important}
   <section class="step" data-key="benefits">
     <div class="card">
       <p class="kicker">Why it makes sense</p>
-      <h2>Potential benefits:</h2>
+      <h2>Potential Benefits:</h2>
       <ul class="benefits">
-        <li><span class="dot">1</span><span><b>Gentle growth</b>One more home at a time, on streets that already exist. Yard and setback rules stay exactly as they are, so neighborhoods keep their space.</span></li>
-        <li><span class="dot">2</span><span><b>Flexibility for homeowners</b>It&rsquo;s an option that allows people to build what they want where they already are. This means the neighborhood is more flexible to react to changes it needs.</span></li>
-        <li><span class="dot">3</span><span><b>Less bureaucracy</b>When the rule fits the lots we already have, fewer owners have to ask the Zoning Board for an exception. That saves planning staff time, and applicants&rsquo; time too.</span></li>
+        <li><span class="dot">1</span><span><b>Gentle Growth</b>One home at a time, on streets that already exist. Yard and setback rules stay exactly as they are, so neighborhoods keep their space.</span></li>
+        <li><span class="dot">2</span><span><b>Flexibility for Homeowners</b>Allow people to build what they want, where they already are. This means the neighborhood is more flexible to react to changes it needs.</span></li>
+        <li><span class="dot">3</span><span><b>Less Bureaucracy</b>When the rule fits the lots we already have, fewer owners have to ask the Zoning Board for an exception. That saves planning staff and applicants time.</span></li>
         
       </ul>
     </div>
@@ -171,7 +177,7 @@ body.explore .story *{pointer-events:none!important}
   <section class="step" data-key="where">
     <div class="card">
       <p class="kicker">Where it would apply</p>
-      <h2>Three residential districts</h2>
+      <h2>Three Residential Districts</h2>
       <p>Today, these districts require more than 5,000 square feet for a single-family lot:</p>
       <div class="chips">
         <span class="chip"><span class="sw" style="background:#c2570c"></span>RS-10: 10,000 sq ft</span>
@@ -184,8 +190,8 @@ body.explore .story *{pointer-events:none!important}
   <div class="gap"></div>
   <section class="step" data-key="everything">
     <div class="card">
-      <p class="kicker">It&rsquo;s already here</p>
-      <h2>Neighborhoods already look like this</h2>
+      <p class="kicker">Existing Conditions</p>
+      <h2>Our Neighborhoods Already Have Small Lots</h2>
       <p>Across these districts, <b>3,937 homes</b> already stand on lots smaller than today&rsquo;s minimum, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#f97316"></span>orange</span>. Another 677 are under 5,000 sq ft, <span class="chip" style="padding:0 8px"><span class="sw" style="background:#991b1b"></span>dark red</span>, which this change would not reach.</p>
       <p>Most of these homes were built decades ago, long before today&rsquo;s lot-size rules. When zoning changed, they ended up out of compliance. They&rsquo;re allowed to stay (&ldquo;grandfathered&rdquo;), but that can make life harder for the people who live in them: repairs, renovations and rebuilding the home they already live in can mean a long review.</p>
       <p>Next: which of the <i>bigger</i> lots could split.</p>
@@ -194,13 +200,15 @@ body.explore .story *{pointer-events:none!important}
   <div class="gap"></div>
   <section class="step" data-key="which">
     <div class="card">
-      <p class="kicker">Which lots could split</p>
-      <h2>So what would be big enough to split?</h2>
+      <p class="kicker">Impacts</p>
+      <h2>Which Lots Would Become Splittable?</h2>
       <div class="big blue">3,991</div>
       <p class="cap">potential new lots, on 3,773 lots that could gain at least one more.</p>
       <p>These are the lots with enough area and street frontage to make more lots than today&rsquo;s rules allow. The darker the blue, the more lots it could become. Lots that can be subdivided but don&rsquo;t gain additional lot potential are hidden; turn them on in the legend.</p>
       <div class="ramp"><span style="background:#bdd7e7"></span><span style="background:#6baed6"></span><span style="background:#2171b5"></span><span style="background:#08306b"></span></div>
       <div class="ramplab"><span>+1 lot</span><span>2</span><span>3</span><span>4 or more</span></div>
+      <p><b>Most lots that could split won&rsquo;t.</b> Splitting is time consuming, and many owners will never want to. If you are curious, look at the legend for extra data to see lots that could split today that aren&rsquo;t! It&rsquo;s a choice, and no one needs to sell, subdivide or build if they don&rsquo;t want to.</p>
+      <p>Historic, environmental and other protections still apply, so we keep building right while we build what we need. We didn&rsquo;t look at other limits, like where a house sits on its lot, wetlands, slopes or easements, which could make many of these lots impractical to split in reality.</p>
       <p class="fine" style="margin-top:8px">Potential only. Counts are what the rule would allow, not what will be built.</p>
     </div>
   </section>
@@ -208,7 +216,7 @@ body.explore .story *{pointer-events:none!important}
   <section class="step" data-key="burncoat">
     <div class="card">
       <p class="kicker">Zoom in: Burncoat</p>
-      <h2>Big lots and small lots, side by side</h2>
+      <h2>Big Lots and Small Lots, Side by Side</h2>
       <p>On the same streets, large lots that could split sit next to homes already on smaller lots. The neighborhood already works both ways, why aren&rsquo;t these historic lot sizes allowed today?</p>
       <p><b>Is your house below the minimum lot size?</b> Look up your address.</p>
       <div class="find"><input id="q" type="search" placeholder="Start typing, e.g. 102 Clark St" aria-label="Look up an address" autocomplete="off"></div>
@@ -221,7 +229,7 @@ body.explore .story *{pointer-events:none!important}
   <section class="step" data-key="explain">
     <div class="card">
       <p class="kicker">What it enables</p>
-      <h2>Small scale flexibility</h2>
+      <h2>Small Scale Flexibility</h2>
       <p>This is gentle growth, not high-rises. One house at a time, on streets that already exist, with the same yards and setbacks. A homeowner with a big lot could split it and build a house, which gives neighbors somewhere new to live.</p>
       <p>They could sell it, or hand it to their kids to give them a head start on equity. An ADU is different: it stays on the same lot, must be much smaller, and can only be rented.</p>
       <div class="pair">
@@ -249,7 +257,6 @@ body.explore .story *{pointer-events:none!important}
           <figcaption><b>Add an ADU</b>One lot, one owner. The small unit stays on the lot and can only be rented.</figcaption>
         </figure>
       </div>
-      <p class="fine">Illustration, not to scale.</p>
     </div>
   </section>
   <div class="gap"></div>
@@ -257,10 +264,9 @@ body.explore .story *{pointer-events:none!important}
   <section class="step" data-key="end">
     <div class="card">
       <p class="kicker">The bottom line</p>
-      <h2>Common sense, and already supported</h2>
+      <h2>Publicly Supported and Right for Worcester</h2>
       <p>We believe in a future for Worcester with more homes in the neighborhoods that already exist. <b>Pass this common-sense change the public already voted for.</b></p>
-      <p><b>Most lots that could split won&rsquo;t.</b> Splitting is time consuming, and many owners will never want to. If you are curious, look at the legend for extra data to see lots that could split today that aren&rsquo;t! It&rsquo;s a choice, and no one needs to sell, subdivide or build if they don&rsquo;t want to.</p>
-      <p>We didn&rsquo;t look at other limits, like where a house sits on its lot, wetlands, slopes or easements. Historic, environmental and other protections still apply, so we keep building right while we build what we need.</p>
+      <p>This is a small, optional change to let Worcester slowly grow housing where it is need. It means <b>gentle growth</b>: one more home at a time on streets that already exist, with the same yards sizes and space between. It gives <b>homeowners flexibility</b> to use their own land for what they need, including more room for their family. And it means <b>less bureaucracy</b>, because owners will not need exceptions from the Planning and Zoning Boards for grandfathered existing homes, which saves planning staff time and applicants&rsquo; time too. <b>Let&rsquo;s make Worcester a place that welcomes more small scale housing for future generations to get a start.</b></p>
       <p class="fine" style="margin-bottom:2px"><b>Sources</b></p>
       <ul class="srcs">
         <li>Election results: <a href="https://www.worcesterma.gov/election-results/20261103.pdf" target="_blank" rel="noopener">City of Worcester unofficial election results, Nov. 3, 2026</a>.</li>
@@ -296,7 +302,7 @@ applyPass();
 L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,opacity:.42,attribution:'Basemap: USGS The National Map'}).addTo(map);
 
 function pane(name,z){var p=map.createPane(name);p.style.zIndex=z;p.classList.add('fade');p.style.opacity=0;return L.svg({pane:name,padding:.4})}
-var rZones=pane('pZones',420),rExB=pane('pExistB',440),rExU=pane('pExistU',445),rUn=pane('pUnch',446),rErr=pane('pErr',447),rOpp=pane('pOpp',450);
+var rZones=pane('pZones',420),rExB=pane('pExistB',440),rExU=pane('pExistU',445),rUn=pane('pUnch',446),rErr=pane('pErr',447),rOpp=pane('pOpp',450),rVY=pane('pVoteY',415),rVN=pane('pVoteN',416);
 
 function n(x){return x.toLocaleString()}
 var ZC={'RS-10':'#c2570c','RS-7':'#e6ab02','RL-7':'#e6ab02'};
@@ -321,8 +327,8 @@ function existPopup(p){var h='<b>'+p.a+'</b><br>Zone '+p.z+' (minimum '+n(p.m)+'
 function mkExist(b,rd,col){return L.geoJSON({type:'FeatureCollection',features:STORY.exist.features.filter(function(f){return f.properties.b===b})},{renderer:rd,style:function(){return {color:'#4a2a0a',weight:.4,fillColor:col,fillOpacity:.92}},onEachFeature:function(f,l){l.bindPopup(existPopup(f.properties))}}).addTo(map)}
 var existB=mkExist('b',rExB,'#f97316'),existU=mkExist('u',rExU,'#991b1b');
 
-function setPane(name,on){var cb=document.getElementById('lg_'+name);if(cb)cb.checked=on;var el=map.getPane(name);if(on){el.style.pointerEvents='';el.style.opacity=1}else{el.style.opacity=0;el.style.pointerEvents='none'}}
-['pZones','pOpp','pExistB','pExistU','pUnch','pErr'].forEach(function(p){setPane(p,false)});
+function setPane(name,on){var cb=document.getElementById('lg_'+name);if(cb)cb.checked=on;var el=map.getPane(name);el.classList.toggle('on',on);if(on){el.style.pointerEvents='';el.style.opacity=1}else{el.style.opacity=0;el.style.pointerEvents='none'}}
+['pZones','pOpp','pExistB','pExistU','pUnch','pErr','pVoteY','pVoteN'].forEach(function(p){setPane(p,false)});
 var curZones=zonesHi;
 function useZones(g){if(g===curZones)return;map.removeLayer(curZones);map.addLayer(g);curZones=g}
 
@@ -336,6 +342,16 @@ var STATE={
  explain:{view:'burn',z:16,on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'},
  end:{view:'city',on:['pZones','pOpp','pExistB','pExistU'],zones:'lo'}
 };
+if(/[?&]voting=1/.test(location.search)){
+  document.getElementById('votebox').hidden=false;
+  var vs=document.createElement('script');vs.src='data/voting-data.js';
+  vs.onload=function(){
+    function shade(p,yes){var d=Math.abs(p.y/(p.y+p.n)-.5),t=Math.min(1,d/.293),c=yes?[46,158,91]:[123,63,160];return 'rgb('+c.map(function(v){return Math.round(255+(v-255)*(.25+.75*t))}).join(',')+')'}
+    function tipv(p){var t=p.y+p.n;return '<b>Ward '+p.l+'</b><br>Yes '+n(p.y)+' ('+(100*p.y/t).toFixed(1)+'%) &middot; No '+n(p.n)+' ('+(100*p.n/t).toFixed(1)+'%)<br>Blank '+n(p.b)+(p.x?'<br><small>'+p.x+'</small>':'')}
+    function netv(p){var d=p.y-p.n,y=d>0;return d===0?'<div style="margin-top:6px;font-weight:700">Tied</div>':'<div style="margin-top:6px;font-size:1.05rem;font-weight:700;color:'+(y?'#2e9e5b':'#7b3fa0')+'">Net '+(y?'+':'+')+n(Math.abs(d))+' '+(y?'Yes':'No')+'</div>'}
+    function mkV(yes,rd){return L.geoJSON({type:'FeatureCollection',features:VOTING.features.filter(function(f){return (f.properties.y>f.properties.n)===yes})},{renderer:rd,style:function(f){return {color:yes?'#2e9e5b':'#7b3fa0',weight:2.5,fillColor:shade(f.properties,yes),fillOpacity:.6}},onEachFeature:function(f,l){l.bindTooltip(tipv(f.properties)+netv(f.properties),{sticky:true});l.bindPopup(tipv(f.properties)+netv(f.properties))}}).addTo(map)}
+    mkV(true,rVY);mkV(false,rVN)};
+  document.head.appendChild(vs)}
 var manual=false,flying=false,flyTimer=null;
 function viewFor(s){flying=true;clearTimeout(flyTimer);flyTimer=setTimeout(function(){flying=false},reduce?150:2200);
   if(s.view==='city')map.flyToBounds(CITY,{animate:!reduce,duration:1.5,padding:[10,10]});
@@ -361,7 +377,7 @@ steps.forEach(function(s){io.observe(s)});
 steps[0].classList.add('active');go('cover');
 window.addEventListener('scroll',function(){var h=document.documentElement;document.getElementById('progress').style.width=(100*h.scrollTop/(h.scrollHeight-h.clientHeight))+'%'},{passive:true});
 
-['pZones','pOpp','pExistB','pExistU','pUnch','pErr'].forEach(function(nm){document.getElementById('lg_'+nm).addEventListener('change',function(){setPane(nm,this.checked)})});
+['pZones','pOpp','pExistB','pExistU','pUnch','pErr','pVoteY','pVoteN'].forEach(function(nm){document.getElementById('lg_'+nm).addEventListener('change',function(){setPane(nm,this.checked)})});
 var lg=document.getElementById('legend'),lgt=document.getElementById('lgt');
 function lgOpen(o){lg.classList.toggle('closed',!o);lgt.setAttribute('aria-expanded',o);document.getElementById('lgc').innerHTML=o?'&#9662;':'&#9656;'}
 lgt.addEventListener('click',function(){lgOpen(lg.classList.contains('closed'))});
